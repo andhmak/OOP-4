@@ -29,11 +29,15 @@ class Weapon : public Item {
     bool twoHanded;
 };
 
+// price = 10*damage - 20*two_handed
+
 //Μία πανοπλία (Armor) είναι ένα αντικείμενο το οποίο όταντο φοράει ένας ήρωας, μειώνει την ζημία που δέχεται από μία επίθεση του αντιπάλου του. 
 
 class Armor : public Item {
     int defense;
 };
+
+//price = 15*defense
 
 enum Stat { strength, dexterity, agility };
 
@@ -44,6 +48,8 @@ class Potion : public Item {
     Stat statAffected;
     int effect;
 };
+
+//price = effect*30
 
 //Ενα  ξόρκι  (Spell)  αντιπροσωπεύει  μια  μαγική  επίθεση  που  μπορεί  να  εκτελέσει  κάποιος  ήρωας. ́Ενα ξόρκι έχει όνομα, τιμή και κάποιο ελάχιστο
 //επίπεδο στο οποίο πρέπει να βρίσκεται ο ήρωας για να  το  χρησιμοποιήσει.    ́Ενα  ξόρκι  έχει  ένα  εύρος  ζημιάς  που  μπορεί  να  προκαλέσει  καθώς 
@@ -58,6 +64,9 @@ class Spell {
     int maxDamage;
     int magicCost;
 };
+
+//price = 10*(mindamage+maxdamage)/2
+//magiccost = 2*(mindamage+maxdamage)/2
 
 //Ενα ξόρκι πάγου(IceSpell) είναι ένα ξόρκι το οποίο, εκτός από τη ζημιά που προκαλεί, μειώνει και το εύρος ζημιάς του αντιπάλου για κάποιους γύρους.
 
@@ -181,7 +190,7 @@ enum HeroType { warrior, sorcerer, paladin };
 
 enum Phase { onMap, inBattle, inShop };
 
-enum Direction { up, down, left, right };
+enum Direction { upDir, downDir, leftDir, rightDir };
 
 class Grid {
     Square** grid;
@@ -213,6 +222,7 @@ class Grid {
                     }
                 }
             }
+            grid[0][0] = common;
             party = new Hero*[heroNum];
             for (int i = 0 ; i < heroNum ; i++) {
                 if (heroTypes[i] == warrior) {
@@ -236,6 +246,79 @@ class Grid {
             }
             delete[] party;
         }
+        void move(Direction direction) {
+            if (direction == upDir) {
+                if (position[1] + 1 >= height) {
+                    cout << "Can't move out of bounds" << endl;
+                    return;
+                }
+                if (grid[position[0]][position[1] + 1] == nonAccesible) {
+                    cout << "Can't move into non-accessible square" << endl;
+                    return;
+                }
+                position[1]++;
+            }
+            else if (direction == downDir) {
+                if (position[1] - 1 < 0) {
+                    cout << "Can't move out of bounds" << endl;
+                    return;
+                }
+                if (grid[position[0]][position[1] - 1] == nonAccesible) {
+                    cout << "Can't move into non-accessible square" << endl;
+                    return;
+                }
+                position[1]--;
+            }
+            else if (direction == leftDir) {
+                if (position[0] - 1 < 0) {
+                    cout << "Can't move out of bounds" << endl;
+                    return;
+                }
+                if (grid[position[0] - 1][position[1]] == nonAccesible) {
+                    cout << "Can't move into non-accessible square" << endl;
+                    return;
+                }
+                position[0]--;
+            }
+            else if (direction == rightDir) {
+                if (position[0] + 1 >= width) {
+                    cout << "Can't move out of bounds" << endl;
+                    return;
+                }
+                if (grid[position[0] + 1][position[1]] == nonAccesible) {
+                    cout << "Can't move into non-accessible square" << endl;
+                    return;
+                }
+                position[0]++;
+            }
+            cout << "pos: " << position[0] << " " << position[1] << endl;
+        }
+        void displayMap() {
+            for (int i = 0 ; i < width ; i++) {
+                for (int j = 0 ; j < height ; j++) {
+                    cout << "Square " << i << ", " << j << ":" << endl;
+                    if (grid[i][j] == nonAccesible) {
+                        cout << "Non-accessible" << endl;
+                    }
+                    else if (grid[i][j] == market) {
+                        cout << "Market" << endl;
+                    }
+                    else {
+                        cout << "Common" << endl;
+                    }
+                    if ((i == position[0]) && (j == position[1])) {
+                        cout << "The party is here" << endl;
+                    }
+                }
+            }
+        }
+        void buy() {
+            if (grid[position[0]][position[1]] != market) {
+                cout << "Can't buy outiside of the market" << endl;
+                return;
+            }
+
+        }
 };
 
 int main(int argc, char* argv[]) {
@@ -245,8 +328,8 @@ int main(int argc, char* argv[]) {
     cout << "Enter grid height:" << endl;
     cin >> height;
     do {
-    cout << "Enter number of heroes in party (between 1 and 3):" << endl;
-    cin >> heroNum;
+        cout << "Enter number of heroes in party (between 1 and 3):" << endl;
+        cin >> heroNum;
     } while (heroNum < 1 || heroNum > 3);
     HeroType heroTypes[heroNum];
     string input;
@@ -272,6 +355,36 @@ int main(int argc, char* argv[]) {
         cin >> input;
         if (!input.compare("quitGame")) {
             break;
+        }
+        else if (!input.compare("move")) {
+            while (true) {
+                cin >> input;
+                if (!input.compare("up")) {
+                    grid.move(upDir);
+                    break;
+                }
+                else if (!input.compare("down")) {
+                    grid.move(downDir);
+                    break;
+                }
+                else if (!input.compare("left")) {
+                    grid.move(leftDir);
+                    break;
+                }
+                else if (!input.compare("right")) {
+                    grid.move(rightDir);
+                    break;
+                }
+                else {
+                    cout << "Not a valid direction" << endl;
+                }
+            }
+        }
+        else if (!input.compare("displayMap")) {
+            grid.displayMap();
+        }
+        else if (!input.compare("buy")) {
+            grid.buy();
         }
         else {
             cout << "Unknown command" << endl;
