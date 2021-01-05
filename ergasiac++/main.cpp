@@ -19,6 +19,13 @@ class Item {
     std::string name;
     int price;
     int minLevel;
+    public:
+        Item(const char* initName, int initPrice, int initMinLevel) : name(initName), price(initPrice), minLevel(initMinLevel) { }
+        virtual void print() const {
+            cout << "Name:       " << name << endl;
+            cout << "Price:      " << price << endl;
+            cout << "Min Level:  " << minLevel << endl;
+        }
 };
 
 //Ενα  όπλο  (Weapon)  είναι  ένααντικείμενο το οποίο μπορεί να χρησιμοποιηθεί από τον ήρωα για να επιτεθεί σε κάποιο τέρας. Εχει ένα συγκεκριμένο ποσό 
@@ -27,6 +34,15 @@ class Item {
 class Weapon : public Item {
     int damage;
     bool twoHanded;
+    public:
+        Weapon(const char* initName, int initDamage, int initTwoHanded)
+        :   Item(initName, 10*initDamage - 20*initTwoHanded, initDamage/3 + 1), damage(initDamage), twoHanded(initTwoHanded) { }
+        void print() const {
+            cout << "Weapon:" << endl;
+            Item::print();
+            cout << "Damage:     " << damage << endl;
+            cout << "Two-handed: " << (twoHanded ? "yes" : "no") << endl;
+        }
 };
 
 // price = 10*damage - 20*two_handed
@@ -35,11 +51,19 @@ class Weapon : public Item {
 
 class Armor : public Item {
     int defense;
+    public:
+        Armor(const char* initName, int initDefense)
+        :   Item(initName, 15*initDefense, initDefense/3 + 1), defense(initDefense) { }
+        void print() const {
+            cout << "Armor:" << endl;
+            Item::print();
+            cout << "Defense:    " << defense << endl;
+        }
 };
 
 //price = 15*defense
 
-enum Stat { strength, dexterity, agility };
+enum Stat { strengthStat, dexterityStat, agilityStat };
 
 //Ενα φίλτρο(Potion) είναι ένα αντικείμενο το οποίο όταν το χρησιμοποιεί ένας ήρωας, αυξάνει κάποιο στατιστικό του
 //κατά  κάποιο  ποσό.  Τα  φίλτρα  είναι  μίας  χρήσης,  πράγμα  που  σημαίνει  ότι  μετά  τη  χρήση  τους,δεν μπορούν να ξαναχρησιμοποιηθούν.
@@ -47,6 +71,14 @@ enum Stat { strength, dexterity, agility };
 class Potion : public Item {
     Stat statAffected;
     int effect;
+    public:
+        Potion(const char* initName, Stat initStatAffected, int initEffect)
+        :   Item(initName, 30*initEffect, initEffect/3 + 1), statAffected(initStatAffected), effect(initEffect) { }
+        void print() const {
+            cout << "Potion:" << endl;
+            Item::print();
+            cout << (statAffected == strengthStat ? "Strength: " : (statAffected == dexterityStat) ? "Dexterity:" : "Agility:  ") << "  +" << effect << endl;
+        }
 };
 
 //price = effect*30
@@ -92,12 +124,14 @@ class Living {
     std::string name;
     int level;
     int healthPower;
+    int maxHealthPower;
     public:
-        Living(const char* initName, int initLevel) : name(initName), level(initLevel), healthPower(100) { }
+        Living(const char* initName, int initLevel) : name(initName), level(initLevel), healthPower(50), maxHealthPower(50) { }
         virtual void print() const {
             cout << "Name:       " << name << endl;
             cout << "Level:      " << level << endl;
             cout << "HP:         " << healthPower << endl;
+            cout << "Max HP:     " << maxHealthPower << endl;
         }
         int getLevel() const {
             return level;
@@ -108,13 +142,20 @@ class Living {
         int getHealthPower() const {
             return healthPower;
         }
-        void setHealthPower(int newHealthPower) {
-            healthPower = newHealthPower;
+        int getMaxHealthPower() const {
+            return maxHealthPower;
         }
-        virtual void getDamage(int damage) {
+        void recoverHealthPower(int amount) {
+            healthPower += amount;
+            if (healthPower > maxHealthPower) {
+                healthPower = maxHealthPower;
+            }
+        }
+        virtual void gainDamage(int damage) {
             healthPower -= damage;
-            if (healthPower < 0) {
+            if (healthPower <= 0) {
                 healthPower = 0;
+                cout << name << " has fainted!" << endl;
             }
         }
 };
@@ -131,17 +172,22 @@ class Living {
 class Hero : public Living {
     protected:
         int magicPower;
+        int maxMagicPower;
         int strength;
         int dexterity;
         int agility;
         int money;
         int experience;
+        Weapon* leftHandWeapon;
+        Weapon* rightHandWeapon;
+        Armor* armor;
     public:
         Hero(const char* initName, int strengthInit, int dexterityInit, int agilityInit)
-        :   Living(initName, 1), magicPower(100),  strength(strengthInit), dexterity(dexterityInit), agility(agilityInit), money(0), experience(0) { }
+        :   Living(initName, 1), magicPower(100), maxMagicPower(100),  strength(strengthInit), dexterity(dexterityInit), agility(agilityInit), money(0), experience(0) { }
         virtual void print() const {
             Living::print();
             cout << "MP:         " << magicPower << endl;
+            cout << "Max MP:     " << maxMagicPower << endl;
             cout << "Strength:   " << strength << endl;
             cout << "Dexterity:  " << dexterity << endl;
             cout << "Agility:    " << agility << endl;
@@ -165,11 +211,19 @@ class Hero : public Living {
         int getMagicPower() const {
             return magicPower;
         }
-        void setMagicPower(int newMagicPower) {
-            magicPower = newMagicPower;
+        void recoverMagicPower(int amount) {
+            magicPower += amount;
+            if (magicPower > maxMagicPower) {
+                magicPower = maxMagicPower;
+            }
         }
         void attack(Living& creature) {
-            creature.getDamage(strength);
+            creature.gainDamage(strength);
+        }
+        void gainDamage(int damage) {
+            if ((rand() % (50 + agility)) < 50) {
+                Living::gainDamage(damage);
+            }
         }
 };
 
@@ -235,9 +289,26 @@ class Monster : public Living {
     public:
         Monster(const char* initName, int initLevel, int initMinDamage, int initMaxDamage, int initDefense, int initAgility)
         :   Living(initName, initLevel), minDamage(initMinDamage), maxDamage(initMaxDamage), defense(initDefense), agility(initAgility) { }
+        virtual void print() const {
+            Living::print();
+            cout << "Min Damage: " << minDamage << endl;
+            cout << "Max Damage: " << maxDamage << endl;
+            cout << "Defense:    " << defense << endl;
+            cout << "Agility:    " << agility << endl;
+        }
         void attack(Living& creature) {
             int range = maxDamage - minDamage;
-            creature.getDamage(minDamage + (rand() % (range + 1)));
+            creature.gainDamage(minDamage + (rand() % (range + 1)));
+        }
+        void gainDamage(int damage) {
+            if ((rand() % (50 + agility)) < 50) {
+                if (damage > defense) {
+                    Living::gainDamage(damage - defense);
+                }
+            }
+            else {
+                cout << "Attack evaded!" << endl;
+            }
         }
 };
 
@@ -247,6 +318,10 @@ class Dragon : public Monster {
     public:
         Dragon(const char* initName, int initLevel)
         :   Monster(initName, initLevel, 3*initLevel, 6*initLevel, 2*initLevel, 2*initLevel) { }
+        void print() const {
+            cout << "Type:       Dragon" << endl;
+            Monster::print();
+        }
 };
 
 //Ενα ον με  εξωσκελετό  (Exoskeleton)  είναι  ένα  τέρας  που  είναι  ευνοημένο  στο  ποσό  άμυνας  που  διαθέτει.
@@ -254,7 +329,11 @@ class Dragon : public Monster {
 class Exoskeleton : public Monster {
     public:
         Exoskeleton(const char* initName, int initLevel)
-        :   Monster(initName, initLevel, 1*initLevel, 2*initLevel, 6*initLevel, 2*initLevel) { }
+        :   Monster(initName, initLevel, 1*initLevel, 2*initLevel, 6*initLevel - 2, 2*initLevel) { }
+        void print() const {
+            cout << "Type:       Exoskeleton" << endl;
+            Monster::print();
+        }
 };
 
 //Ενα  πνεύμα  (Spirit)  είναι  ένα  τέρας  που  είναι  ευνοημένο  στο  πόσο  συχνά  αποφεύγει  επιθέσεις  του αντιπάλου του.
@@ -263,6 +342,10 @@ class Spirit : public Monster {
     public:
         Spirit(const char* initName, int initLevel)
         :   Monster(initName, initLevel, 1*initLevel, 2*initLevel, 2*initLevel, 6*initLevel) { }
+        void print() const {
+            cout << "Type:       Spirit" << endl;
+            Monster::print();
+        }
 };
 
 enum Square { nonAccesible, market, common };
@@ -280,8 +363,14 @@ class Grid {
     Hero** party;
     int heroNum;
     int position[2];
-    vector<Item> items;
-    vector<Spell> spells;
+    Weapon* marketWeapons[20];
+    Armor* marketArmors[20];
+    Potion* marketPotions[20];
+    Spell* marketSpells[20];
+    vector<Weapon> ownedWeapons;
+    vector<Armor> ownedArmors;
+    vector<Potion> ownedPotions;
+    vector<Spell> ownedSpells;
     public:
         Grid(int initWidth, int initHeight, HeroType* heroTypes, int heroNumInit)
         :   width(initWidth), height(initHeight), heroNum(heroNumInit), position{0,0} {
@@ -316,6 +405,21 @@ class Grid {
                     party[i] = new Paladin(names[rand() % 98]);
                 }
             }
+            for (int i = 0 ; i < 15 ; i++) {
+                marketWeapons[i] = new Weapon(weaponNames[i], i + 1, i/10);
+            }
+            for (int i = 0 ; i < 15 ; i++) {
+                marketArmors[i] = new Armor(armorNames[i], i + 1);
+            }
+            for (int i = 0 ; i < 5 ; i++) {
+                marketPotions[i] = new Potion(potionNames[i], strengthStat, i + 1);
+            }
+            for (int i = 5 ; i < 10 ; i++) {
+                marketPotions[i] = new Potion(potionNames[i], dexterityStat, i - 4);
+            }
+            for (int i = 10 ; i < 15 ; i++) {
+                marketPotions[i] = new Potion(potionNames[i], agilityStat, i - 9);
+            }
         }
         ~Grid() {
             for (int i = 0 ; i < width ; i++) {
@@ -326,6 +430,15 @@ class Grid {
                 delete party[i];
             }
             delete[] party;
+            for (int i = 0 ; i < 15 ; i++) {
+                delete marketWeapons[i];
+            }
+            for (int i = 0 ; i < 15 ; i++) {
+                delete marketArmors[i];
+            }
+            for (int i = 0 ; i < 15 ; i++) {
+                delete marketPotions[i];
+            }
         }
         void playGame() {
             while (true) {
@@ -358,8 +471,8 @@ class Grid {
                         }
                     }
                 }
-                else if (!input.compare("displayStats")) {
-                    displayStats();
+                else if (!input.compare("displayHeroStats")) {
+                    displayHeroStats();
                 }
                 else if (!input.compare("displayMap")) {
                     displayMap();
@@ -372,6 +485,11 @@ class Grid {
                     for (int i = 0 ; i < heroNum ; i++) {
                         party[i]->addExperience(20);
                     }
+                }
+                //*/
+                //*
+                else if (!input.compare("battle")) {
+                    battle();
                 }
                 //*/
                 else {
@@ -449,7 +567,7 @@ class Grid {
                 }
             }
         }
-        void displayStats() {
+        void displayHeroStats() {
             for (int i = 0 ; i < heroNum ; i++) {
                 cout << i + 1 << (i == 0 ? "st" : (i == 1 ? "nd" : "rd")) << " hero's stats: " << endl;
                 party[i]->print();
@@ -460,13 +578,94 @@ class Grid {
                 cout << "Can't buy outiside of the market" << endl;
                 return;
             }
-            cout << "Buying..." << endl;
+            string input;
+            int toBuy;
+            while (true) {
+                cout << "What to buy?" << endl;
+                while (true) {
+                    cin >> input;
+                    if (!input.compare("weapon")) {
+                        toBuy = 0;
+                        break;
+                    }
+                    else if (!input.compare("armor")) {
+                        toBuy = 1;
+                        break;
+                    }
+                    else if (!input.compare("potion")) {
+                        toBuy = 2;
+                        break;
+                    }
+                    else {
+                        cout << "Invalid input" << endl;
+                    }
+                }
+                cout << "Choose one:" << endl;
+                if (toBuy == 0) {
+                    for (int i = 0 ; i < 15 ; i++) {
+                        cout << "\n(" << i + 1 << ")" << endl;
+                        marketWeapons[i]->print();
+                    }
+                }
+                else if (toBuy == 1) {
+                    for (int i = 0 ; i < 15 ; i++) {
+                        cout << "\n(" << i + 1 << ")" << endl;
+                        marketArmors[i]->print();
+                    }
+                }
+                else if (toBuy == 2) {
+                    for (int i = 0 ; i < 15 ; i++) {
+                        cout << "\n(" << i + 1 << ")" << endl;
+                        marketPotions[i]->print();
+                    }
+                }
+                while (true) {
+                    cin >> input;
+                    if (!input.compare("back")) {
+                        break;
+                    }
+                    else if ((atoi(input.c_str()) > 0) && (atoi(input.c_str()) <= 15)) {
+                        if (toBuy == 0) {
+                            cout << "Buying weapon " << atoi(input.c_str()) - 1 << "..." << endl;
+                        }
+                        else if (toBuy == 1) {
+                            cout << "Buying armor " << atoi(input.c_str()) - 1 << "..." << endl;
+                        }
+                        else if (toBuy == 2) {
+                            cout << "Buying potion " << atoi(input.c_str()) - 1 << "..." << endl;
+                        }
+                        break;
+                    }
+                    else {
+                        cout << "Invalid input" << endl;
+                    }
+                }
+                cout << "Buy more? (y/n)" << endl;
+                bool done;
+                while (true) {
+                    cin >> input;
+                    if (!input.compare("y")) {
+                        done = false;
+                        break;
+                    }
+                    else if (!input.compare("n")) {
+                        done = true;
+                        break;
+                    }
+                    else {
+                        cout << "Invalid input" << endl;
+                    }
+                }
+                if (done) {
+                    break;
+                }
+            }
         }
         void battle() {
             cout << "Battle!" << endl;
             int averageHeroLevel = 0;
             for (int i = 0 ; i < heroNum ; i++) {
-                averageHeroLevel = party[i]->getLevel();
+                averageHeroLevel += party[i]->getLevel();
             }
             averageHeroLevel /= heroNum;
             int monsterNum = heroNum + (rand() % 3);
@@ -485,6 +684,24 @@ class Grid {
             bool won = true, lost = true;
             while (true) {
                 string input;
+                cout << "Display stats? (y/n)" << endl;
+                while (true) {
+                    cin >> input;
+                    if (!input.compare("y")) {
+                        displayHeroStats();
+                        for (int i = 0 ; i < monsterNum ; i++) {
+                            cout << i + 1 << (i == 0 ? "st" : (i == 1 ? "nd" : (i == 2 ? "rd" : "th"))) << " monster's stats: " << endl;
+                            monsters[i]->print();
+                        }
+                        break;
+                    }
+                    else if (!input.compare("n")) {
+                        break;
+                    }
+                    else {
+                        cout << "Invalid input" << endl;
+                    }
+                }
                 won = true, lost = true;
                 for (int i = 0 ; i < heroNum ; i++) {
                     if (party[i]->getHealthPower() != 0) {
@@ -499,6 +716,8 @@ class Grid {
                                     cout << "(" << j + 1 << ") " << monsters[j]->getName() << ", HP: " << monsters[j]->getHealthPower() <<  endl;
                                 }
                                 while (true) {
+                                    cin.clear();
+                                    cin.ignore(1000, '\n');
                                     cin >> numInput;
                                     if ((numInput > 0) && (numInput <= monsterNum)) {
                                         break;
@@ -520,7 +739,7 @@ class Grid {
                     if (monsters[i]->getHealthPower() != 0) {
                         won = false;
                         for (int j = 0 ; j < heroNum; j++) {
-                            if (party[j]->getMagicPower() != 0) {
+                            if (party[j]->getHealthPower() != 0) {
                                 monsters[i]->attack(*party[j]);
                                 break;
                             }
@@ -531,27 +750,33 @@ class Grid {
                     break;
                 }
                 for (int i = 0 ; i < heroNum ; i++) {
-                    party[i]->setHealthPower((party[i]->getHealthPower() + 1 > 100) ? 100 : (party[i]->getHealthPower() + 1));
-                    party[i]->setMagicPower((party[i]->getMagicPower() + 1 > 100) ? 100 : (party[i]->getMagicPower() + 1));
+                    if (party[i]->getHealthPower() != 0) {
+                        party[i]->recoverHealthPower(1);
+                        party[i]->recoverMagicPower(1);
+                    }
                 }
                 for (int i = 0 ; i < monsterNum ; i++) {
-                    monsters[i]->setHealthPower((monsters[i]->getHealthPower() + 1 > 100) ? 100 : (monsters[i]->getHealthPower() + 1));
+                    if (monsters[i]->getHealthPower() != 0) {
+                        monsters[i]->recoverHealthPower(1);
+                    }
                 }
             }
             if (won) {
+                cout << "The party has won!" << endl;
                 for (int i = 0 ; i < heroNum ; i++) {
                     party[i]->setMoney(party[i]->getMoney() + party[i]->getLevel()*10 + monsterNum*20);
                     party[i]->addExperience(party[i]->getLevel()*5 + monsterNum*20);
                 }
             }
             else {
+                cout << "The party has lost!" << endl;
                 for (int i = 0 ; i < heroNum ; i++) {
                     party[i]->setMoney(party[i]->getMoney() / 2);
                 }
             }
             for (int i = 0 ; i < heroNum ; i++) {
                 if (party[i]->getHealthPower() == 0) {
-                    party[i]->setHealthPower(50);
+                    party[i]->recoverHealthPower(party[i]->getMaxHealthPower() / 2);
                 }
             }
             for (int i = 0 ; i < monsterNum ; i++) {
@@ -569,6 +794,8 @@ int main(int argc, char* argv[]) {
     cin >> height;
     do {
         cout << "Enter number of heroes in party (between 1 and 3):" << endl;
+        cin.clear();
+        cin.ignore(1000, '\n');
         cin >> heroNum;
     } while (heroNum < 1 || heroNum > 3);
     HeroType heroTypes[heroNum];
@@ -576,13 +803,13 @@ int main(int argc, char* argv[]) {
     for (int i = 0 ; i  < heroNum ; i++) {
         cout << "Enter type of " << i + 1 << (i == 0 ? "st" : (i == 1 ? "nd" : "rd")) << " hero:" << endl;
         cin >> input;
-        if (!input.compare("Warrior")) {
+        if (!input.compare("warrior")) {
             heroTypes[i] = warrior;
         }
-        else if (!input.compare("Sorcerer")) {
+        else if (!input.compare("sorcerer")) {
             heroTypes[i] = sorcerer;
         }
-        else if (!input.compare("Paladin")) {
+        else if (!input.compare("paladin")) {
             heroTypes[i] = paladin;
         }
         else {
@@ -593,3 +820,5 @@ int main(int argc, char* argv[]) {
     Grid grid(width, height, heroTypes, heroNum);
     grid.playGame();
 }
+
+//itemise/polymorphise everything
