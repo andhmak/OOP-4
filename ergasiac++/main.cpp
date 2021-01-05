@@ -93,7 +93,30 @@ class Living {
     int level;
     int healthPower;
     public:
-        Living(const char* initName) : name(initName), level(1), healthPower(100) { }
+        Living(const char* initName, int initLevel) : name(initName), level(initLevel), healthPower(100) { }
+        virtual void print() const {
+            cout << "Name:       " << name << endl;
+            cout << "Level:      " << level << endl;
+            cout << "HP:         " << healthPower << endl;
+        }
+        int getLevel() const {
+            return level;
+        }
+        std::string getName() const {
+            return name;
+        }
+        int getHealthPower() const {
+            return healthPower;
+        }
+        void setHealthPower(int newHealthPower) {
+            healthPower = newHealthPower;
+        }
+        virtual void getDamage(int damage) {
+            healthPower -= damage;
+            if (healthPower < 0) {
+                healthPower = 0;
+            }
+        }
 };
 
 //Ενας ήρωας (Hero) είναι έναζωντανό ον.
@@ -106,15 +129,48 @@ class Living {
 //Σε κάθε επίπεδο, οι τιμές της δύναμης, της επιδεξιότητας και της ευκινησίας του ήρωα,αυξάνονται κατά κάποιο ποσό.
 
 class Hero : public Living {
-    int magicPower;
-    int strength;
-    int dexterity;
-    int agility;
-    int money;
-    int experience;
+    protected:
+        int magicPower;
+        int strength;
+        int dexterity;
+        int agility;
+        int money;
+        int experience;
     public:
         Hero(const char* initName, int strengthInit, int dexterityInit, int agilityInit)
-        :   Living(initName), strength(strengthInit), dexterity(dexterityInit), agility(agilityInit), money(0), experience(0) { }
+        :   Living(initName, 1), magicPower(100),  strength(strengthInit), dexterity(dexterityInit), agility(agilityInit), money(0), experience(0) { }
+        virtual void print() const {
+            Living::print();
+            cout << "MP:         " << magicPower << endl;
+            cout << "Strength:   " << strength << endl;
+            cout << "Dexterity:  " << dexterity << endl;
+            cout << "Agility:    " << agility << endl;
+            cout << "Money:      " << money << endl;
+            cout << "Experience: " << experience << endl;
+        }
+        void addExperience(int amount) {
+            experience += amount;
+            if (experience >= 100) {
+                experience -= 100;
+                levelUp();
+            }
+        }
+        virtual void levelUp() = 0;
+        int getMoney() const {
+            return money;
+        }
+        void setMoney(int newMoney) {
+            money = newMoney;
+        }
+        int getMagicPower() const {
+            return magicPower;
+        }
+        void setMagicPower(int newMagicPower) {
+            magicPower = newMagicPower;
+        }
+        void attack(Living& creature) {
+            creature.getDamage(strength);
+        }
 };
 
 //Ενας μαχητής (Warrior) είναι ένας ήρωας που είναι ευνοημένος στοντομέα  της  δύναμης  και  της  ευκινησίας.
@@ -123,8 +179,15 @@ class Hero : public Living {
 
 class Warrior : public Hero {
     public:
-        Warrior(const char* initName) : Hero(initName, 5, 2, 5) {
-            cout << "A warrior had been created" << endl;
+        Warrior(const char* initName) : Hero(initName, 5, 2, 5) { }
+        void print() const {
+            cout << "Type:       Warrior" << endl;
+            Hero::print();
+        }
+        void levelUp() {
+            strength += 3;
+            dexterity++;
+            agility += 3;
         }
 };
 
@@ -132,8 +195,15 @@ class Warrior : public Hero {
 
 class Sorcerer : public Hero {
     public:
-        Sorcerer(const char* initName) : Hero(initName, 2, 5, 5) {
-            cout << "A sorcerer had been created" << endl;
+        Sorcerer(const char* initName) : Hero(initName, 2, 5, 5) { }
+        void print() const {
+            cout << "Type:       Sorcerer" << endl;
+            Hero::print();
+        }
+        void levelUp() {
+            strength++;
+            dexterity += 3;
+            agility += 3;
         }
 };
 
@@ -141,8 +211,15 @@ class Sorcerer : public Hero {
 
 class Paladin : public Hero {
     public:
-        Paladin(const char* initName) : Hero(initName, 5, 5, 2) {
-            cout << "A paladin had been created" << endl;
+        Paladin(const char* initName) : Hero(initName, 5, 5, 2) { }
+        void print() const {
+            cout << "Type:       Paladin" << endl;
+            Hero::print();
+        }
+        void levelUp() {
+            strength += 3;
+            dexterity += 3;
+            agility++;
         }
 };
 
@@ -156,32 +233,36 @@ class Monster : public Living {
     int defense;
     int agility;
     public:
-        Monster(const char* initName, int initMinDamage, int initMaxDamage, int initDefense, int initAgility)
-        :   Living(initName), minDamage(initMinDamage), maxDamage(initMaxDamage), defense(initDefense), agility(initAgility) { }
+        Monster(const char* initName, int initLevel, int initMinDamage, int initMaxDamage, int initDefense, int initAgility)
+        :   Living(initName, initLevel), minDamage(initMinDamage), maxDamage(initMaxDamage), defense(initDefense), agility(initAgility) { }
+        void attack(Living& creature) {
+            int range = maxDamage - minDamage;
+            creature.getDamage(minDamage + (rand() % (range + 1)));
+        }
 };
 
 //Ενας δράκος(Dragon) είναι ένα τέρας που είναι ευνοημένο στο εύρος ζημιάς που μπορεί να προκαλέσει.
 
 class Dragon : public Monster {
     public:
-        Dragon(const char* initName)
-        :   Monster(initName, 3, 6, 2, 2) { }
+        Dragon(const char* initName, int initLevel)
+        :   Monster(initName, initLevel, 3*initLevel, 6*initLevel, 2*initLevel, 2*initLevel) { }
 };
 
 //Ενα ον με  εξωσκελετό  (Exoskeleton)  είναι  ένα  τέρας  που  είναι  ευνοημένο  στο  ποσό  άμυνας  που  διαθέτει.
 
 class Exoskeleton : public Monster {
     public:
-        Exoskeleton(const char* initName)
-        :   Monster(initName, 1, 2, 6, 2) { }
+        Exoskeleton(const char* initName, int initLevel)
+        :   Monster(initName, initLevel, 1*initLevel, 2*initLevel, 6*initLevel, 2*initLevel) { }
 };
 
 //Ενα  πνεύμα  (Spirit)  είναι  ένα  τέρας  που  είναι  ευνοημένο  στο  πόσο  συχνά  αποφεύγει  επιθέσεις  του αντιπάλου του.
 
 class Spirit : public Monster {
     public:
-        Spirit(const char* initName)
-        :   Monster(initName, 1, 2, 2, 6) { }
+        Spirit(const char* initName, int initLevel)
+        :   Monster(initName, initLevel, 1*initLevel, 2*initLevel, 2*initLevel, 6*initLevel) { }
 };
 
 enum Square { nonAccesible, market, common };
@@ -226,13 +307,13 @@ class Grid {
             party = new Hero*[heroNum];
             for (int i = 0 ; i < heroNum ; i++) {
                 if (heroTypes[i] == warrior) {
-                    party[i] = new Warrior(heroNames[rand() % 98]);
+                    party[i] = new Warrior(names[rand() % 98]);
                 }
                 else if (heroTypes[i] == sorcerer) {
-                    party[i] = new Sorcerer(heroNames[rand() % 98]);
+                    party[i] = new Sorcerer(names[rand() % 98]);
                 }
                 else {
-                    party[i] = new Paladin(heroNames[rand() % 98]);
+                    party[i] = new Paladin(names[rand() % 98]);
                 }
             }
         }
@@ -245,6 +326,58 @@ class Grid {
                 delete party[i];
             }
             delete[] party;
+        }
+        void playGame() {
+            while (true) {
+                string input;
+                cin >> input;
+                if (!input.compare("quitGame")) {
+                    break;
+                }
+                else if (!input.compare("move")) {
+                    while (true) {
+                        cin >> input;
+                        if (!input.compare("up")) {
+                            move(upDir);
+                            break;
+                        }
+                        else if (!input.compare("down")) {
+                            move(downDir);
+                            break;
+                        }
+                        else if (!input.compare("left")) {
+                            move(leftDir);
+                            break;
+                        }
+                        else if (!input.compare("right")) {
+                            move(rightDir);
+                            break;
+                        }
+                        else {
+                            cout << "Not a valid direction" << endl;
+                        }
+                    }
+                }
+                else if (!input.compare("displayStats")) {
+                    displayStats();
+                }
+                else if (!input.compare("displayMap")) {
+                    displayMap();
+                }
+                else if (!input.compare("buy")) {
+                    buy();
+                }
+                //*
+                else if (!input.compare("up")) {
+                    for (int i = 0 ; i < heroNum ; i++) {
+                        party[i]->addExperience(20);
+                    }
+                }
+                //*/
+                else {
+                    cout << "Unknown command" << endl;
+                }
+            }
         }
         void move(Direction direction) {
             if (direction == upDir) {
@@ -292,6 +425,9 @@ class Grid {
                 position[0]++;
             }
             cout << "pos: " << position[0] << " " << position[1] << endl;
+            if ((grid[position[0]][position[1]] == common) && !(rand() % 4)) {
+                battle();
+            }
         }
         void displayMap() {
             for (int i = 0 ; i < width ; i++) {
@@ -309,7 +445,14 @@ class Grid {
                     if ((i == position[0]) && (j == position[1])) {
                         cout << "The party is here" << endl;
                     }
+                    cout << endl;
                 }
+            }
+        }
+        void displayStats() {
+            for (int i = 0 ; i < heroNum ; i++) {
+                cout << i + 1 << (i == 0 ? "st" : (i == 1 ? "nd" : "rd")) << " hero's stats: " << endl;
+                party[i]->print();
             }
         }
         void buy() {
@@ -317,7 +460,104 @@ class Grid {
                 cout << "Can't buy outiside of the market" << endl;
                 return;
             }
-
+            cout << "Buying..." << endl;
+        }
+        void battle() {
+            cout << "Battle!" << endl;
+            int averageHeroLevel = 0;
+            for (int i = 0 ; i < heroNum ; i++) {
+                averageHeroLevel = party[i]->getLevel();
+            }
+            averageHeroLevel /= heroNum;
+            int monsterNum = heroNum + (rand() % 3);
+            Monster** monsters = new Monster*[monsterNum];
+            for (int i = 0 ; i < monsterNum ; i++) {
+                if (!(rand() % 3)) {
+                    monsters[i] = new Dragon(names[rand() % 98], averageHeroLevel);
+                }
+                else if (!(rand() % 2)) {
+                    monsters[i] = new Exoskeleton(names[rand() % 98], averageHeroLevel);
+                }
+                else {
+                    monsters[i] = new Spirit(names[rand() % 98], averageHeroLevel);
+                }
+            }
+            bool won = true, lost = true;
+            while (true) {
+                string input;
+                won = true, lost = true;
+                for (int i = 0 ; i < heroNum ; i++) {
+                    if (party[i]->getHealthPower() != 0) {
+                        lost = false;
+                        cout << "What should " << party[i]->getName() << " do?" << endl;
+                        while (true) {
+                            cin >> input;
+                            if (!input.compare("attack")) {
+                                int numInput;
+                                cout << "Which monster to attack?" << endl;
+                                for (int j = 0 ; j < monsterNum ; j++) {
+                                    cout << "(" << j + 1 << ") " << monsters[j]->getName() << ", HP: " << monsters[j]->getHealthPower() <<  endl;
+                                }
+                                while (true) {
+                                    cin >> numInput;
+                                    if ((numInput > 0) && (numInput <= monsterNum)) {
+                                        break;
+                                    }
+                                    else {
+                                        cout << "Invalid input" << endl;
+                                    }
+                                }
+                                party[i]->attack(*monsters[numInput - 1]);
+                                break;
+                            }
+                            else {
+                                cout << "Unknown command" << endl;
+                            }
+                        }
+                    }
+                }
+                for (int i = 0 ; i < monsterNum ; i++) {
+                    if (monsters[i]->getHealthPower() != 0) {
+                        won = false;
+                        for (int j = 0 ; j < heroNum; j++) {
+                            if (party[j]->getMagicPower() != 0) {
+                                monsters[i]->attack(*party[j]);
+                                break;
+                            }
+                        }
+                    }
+                }
+                if (won || lost) {
+                    break;
+                }
+                for (int i = 0 ; i < heroNum ; i++) {
+                    party[i]->setHealthPower((party[i]->getHealthPower() + 1 > 100) ? 100 : (party[i]->getHealthPower() + 1));
+                    party[i]->setMagicPower((party[i]->getMagicPower() + 1 > 100) ? 100 : (party[i]->getMagicPower() + 1));
+                }
+                for (int i = 0 ; i < monsterNum ; i++) {
+                    monsters[i]->setHealthPower((monsters[i]->getHealthPower() + 1 > 100) ? 100 : (monsters[i]->getHealthPower() + 1));
+                }
+            }
+            if (won) {
+                for (int i = 0 ; i < heroNum ; i++) {
+                    party[i]->setMoney(party[i]->getMoney() + party[i]->getLevel()*10 + monsterNum*20);
+                    party[i]->addExperience(party[i]->getLevel()*5 + monsterNum*20);
+                }
+            }
+            else {
+                for (int i = 0 ; i < heroNum ; i++) {
+                    party[i]->setMoney(party[i]->getMoney() / 2);
+                }
+            }
+            for (int i = 0 ; i < heroNum ; i++) {
+                if (party[i]->getHealthPower() == 0) {
+                    party[i]->setHealthPower(50);
+                }
+            }
+            for (int i = 0 ; i < monsterNum ; i++) {
+                delete monsters[i];
+            }
+            delete[] monsters;
         }
 };
 
@@ -351,43 +591,5 @@ int main(int argc, char* argv[]) {
         }
     }
     Grid grid(width, height, heroTypes, heroNum);
-    while (true) {
-        cin >> input;
-        if (!input.compare("quitGame")) {
-            break;
-        }
-        else if (!input.compare("move")) {
-            while (true) {
-                cin >> input;
-                if (!input.compare("up")) {
-                    grid.move(upDir);
-                    break;
-                }
-                else if (!input.compare("down")) {
-                    grid.move(downDir);
-                    break;
-                }
-                else if (!input.compare("left")) {
-                    grid.move(leftDir);
-                    break;
-                }
-                else if (!input.compare("right")) {
-                    grid.move(rightDir);
-                    break;
-                }
-                else {
-                    cout << "Not a valid direction" << endl;
-                }
-            }
-        }
-        else if (!input.compare("displayMap")) {
-            grid.displayMap();
-        }
-        else if (!input.compare("buy")) {
-            grid.buy();
-        }
-        else {
-            cout << "Unknown command" << endl;
-        }
-    }
+    grid.playGame();
 }
