@@ -402,11 +402,11 @@ class Grid {
     Hero** party;
     int heroNum;
     int position[2];
-    Item* marketItems[45];
+    Weapon* marketWeapons[15];
+    Armor* marketArmors[15];
+    Potion* marketPotions[15];
     Spell* marketSpells[15];
-    vector<Weapon*> ownedWeapons;
-    vector<Armor*> ownedArmors;
-    vector<Potion*> ownedPotions;
+    vector<Item*> ownedItems;
     vector<Spell*> ownedSpells;
     public:
         Grid(int initWidth, int initHeight, HeroType* heroTypes, int heroNumInit)
@@ -443,19 +443,19 @@ class Grid {
                 }
             }
             for (int i = 0 ; i < 15 ; i++) {
-                marketItems[i] = new Weapon(weaponNames[i], i + 1, i/10);
+                marketWeapons[i] = new Weapon(weaponNames[i], i + 1, i/10);
             }
-            for (int i = 15 ; i < 30 ; i++) {
-                marketItems[i] = new Armor(armorNames[i - 15], i - 14);
+            for (int i = 0 ; i < 15 ; i++) {
+                marketArmors[i] = new Armor(armorNames[i], i + 1);
             }
-            for (int i = 30 ; i < 35 ; i++) {
-                marketItems[i] = new Potion(potionNames[i - 30], strengthStat, i - 29);
+            for (int i = 0 ; i < 5 ; i++) {
+                marketPotions[i] = new Potion(potionNames[i], strengthStat, i + 1);
             }
-            for (int i = 35 ; i < 40 ; i++) {
-                marketItems[i] = new Potion(potionNames[i - 30], dexterityStat, i - 34);
+            for (int i = 5 ; i < 10 ; i++) {
+                marketPotions[i] = new Potion(potionNames[i], dexterityStat, i - 4);
             }
-            for (int i = 40 ; i < 45 ; i++) {
-                marketItems[i] = new Potion(potionNames[i], agilityStat, i - 39);
+            for (int i = 10 ; i < 15 ; i++) {
+                marketPotions[i] = new Potion(potionNames[i], agilityStat, i - 9);
             }
         }
         ~Grid() {
@@ -467,8 +467,14 @@ class Grid {
                 delete party[i];
             }
             delete[] party;
-            for (int i = 0 ; i < 45 ; i++) {
-                delete marketItems[i];
+            for (int i = 0 ; i < 15 ; i++) {
+                delete marketWeapons[i];
+            }
+            for (int i = 0 ; i < 15 ; i++) {
+                delete marketArmors[i];
+            }
+            for (int i = 0 ; i < 15 ; i++) {
+                delete marketPotions[i];
             }
         }
         void playGame() {
@@ -507,12 +513,6 @@ class Grid {
                 }
                 else if (!input.compare("checkInventory")) {
                     checkInventory();
-                }
-                else if (!input.compare("equip")) {
-                    equip();
-                }
-                else if (!input.compare("use")) {
-                    use();
                 }
                 else if (!input.compare("displayMap")) {
                     displayMap();
@@ -614,59 +614,14 @@ class Grid {
             }
         }
         void checkInventory() {
-            cout << "Weapons in inventory:" << endl;
-            for (vector<Weapon*>::iterator iter = ownedWeapons.begin() ; iter != ownedWeapons.end() ; iter++) {
-                (*iter)->print();
-            }
-            cout << "Armors in inventory:" << endl;
-            for (vector<Armor*>::iterator iter = ownedArmors.begin() ; iter != ownedArmors.end() ; iter++) {
-                (*iter)->print();
-            }
-            cout << "Potions in inventory:" << endl;
-            for (vector<Potion*>::iterator iter = ownedPotions.begin() ; iter != ownedPotions.end() ; iter++) {
+            cout << "Items in inventory:" << endl;
+            for (vector<Item*>::iterator iter = ownedItems.begin() ; iter != ownedItems.end() ; iter++) {
                 (*iter)->print();
             }
             cout << "Spells in inventory:" << endl;
             for (vector<Spell*>::iterator iter = ownedSpells.begin() ; iter != ownedSpells.end() ; iter++) {
                 (*iter)->print();
             }
-        }
-        void equip() {
-            
-        }
-        void use() {
-            cout << "Which potion to use?" << endl;
-            int i = 0;
-            for (vector<Potion*>::iterator iter = ownedPotions.begin(); iter != ownedPotions.end() ; iter++, i++) {
-                cout << "\n(" << i + 1 << ")" << endl;
-                (*iter)->print();
-            }
-            Potion* toUse;
-            while (true) {
-                string input;
-                cin >> input;
-                if (!input.compare("back")) {
-                    return;
-                }
-                else if ((atoi(input.c_str()) > 0) && (atoi(input.c_str()) <= ownedPotions.size())) {
-                    toUse = ownedPotions[(atoi(input.c_str() - 1];
-                    break;
-                }
-                else {
-                    cout << "Invalid input" << endl;
-                }
-            }
-            int heroPos = 0;
-            if (heroNum > 1) {
-                do {
-                    cout << "Which hero should use it? (1-" << heroNum << ")" << endl;
-                    cin.clear();
-                    cin.ignore(1000, '\n');
-                    cin >> heroPos;
-                    heroPos--;
-                }   while ((heroPos < 0) || (heroPos >= heroNum));
-            }
-            party[heroPos]->use(toUse);
         }
         void buy() {
             if (grid[position[0]][position[1]] != market) {
@@ -675,20 +630,20 @@ class Grid {
             }
             while (true) {
                 string input;
-                int offset;
+                int type;
                 cout << "What to buy?" << endl;
                 while (true) {
                     cin >> input;
                     if (!input.compare("weapon")) {
-                        offset = 0;
+                        type = 0;
                         break;
                     }
                     else if (!input.compare("armor")) {
-                        offset = 15;
+                        type = 1;
                         break;
                     }
                     else if (!input.compare("potion")) {
-                        offset = 30;
+                        type = 2;
                         break;
                     }
                     else {
@@ -696,9 +651,23 @@ class Grid {
                     }
                 }
                 cout << "Choose one:" << endl;
-                for (int i = offset ; i < 15 + offset ; i++) {
-                    cout << "\n(" << i + 1 << ")" << endl;
-                    marketItems[i]->print();
+                if (type == 0) {
+                    for (int i = 0 ; i < 15 ; i++) {
+                        cout << "\n(" << i + 1 << ")" << endl;
+                        marketWeapons[i]->print();
+                    }
+                }
+                else if (type == 1) {
+                    for (int i = 0 ; i < 15 ; i++) {
+                        cout << "\n(" << i + 1 << ")" << endl;
+                        marketArmors[i]->print();
+                    }
+                }
+                else if (type == 2) {
+                    for (int i = 0 ; i < 15 ; i++) {
+                        cout << "\n(" << i + 1 << ")" << endl;
+                        marketPotions[i]->print();
+                    }
                 }
                 while (true) {
                     cin >> input;
@@ -706,7 +675,16 @@ class Grid {
                         break;
                     }
                     else if ((atoi(input.c_str()) > 0) && (atoi(input.c_str()) <= 15)) {
-                        Item* toBuy = marketItems[atoi(input.c_str()) - 1 + offset];
+                        Item* toBuy;
+                        if (type == 0) {
+                           toBuy = marketWeapons[atoi(input.c_str()) - 1];
+                        }
+                        else if (type == 1) {
+                           toBuy = marketArmors[atoi(input.c_str()) - 1];
+                        }
+                        else if (type == 2) {
+                           toBuy = marketPotions[atoi(input.c_str()) - 1];
+                        }
                         int totalMoney = 0, toPay = toBuy->getPrice();
                         for (int i = 0 ; i < heroNum ; i++) {
                             totalMoney += party[i]->getMoney();
@@ -724,15 +702,7 @@ class Grid {
                                 party[i]->spendMoney(party[i]->getMoney());
                             }
                         }
-                        if (offset == 0) {
-                            ownedWeapons.push_back((Weapon*) toBuy);
-                        }
-                        else if (offset == 1) {
-                            ownedArmors.push_back((Armor*) toBuy);
-                        }
-                        else if (offset == 2) {
-                            ownedPotions.push_back((Potion*) toBuy);
-                        }
+                        ownedItems.push_back(toBuy);
                         break;
                     }
                     else {
