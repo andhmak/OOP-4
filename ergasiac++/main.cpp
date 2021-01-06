@@ -8,6 +8,7 @@
 #include <cstdlib>
 #include <ctime>
 #include <vector>
+#include <list>
 #include "names.h"
 
 using namespace std;
@@ -28,6 +29,9 @@ class Item {
         }
         int getPrice() const {
             return price;
+        }
+        int getMinLevel() const {
+            return minLevel;
         }
 };
 
@@ -77,6 +81,12 @@ class Potion : public Item {
     public:
         Potion(const char* initName, Stat initStatAffected, int initEffect)
         :   Item(initName, 30*initEffect, initEffect/3 + 1), statAffected(initStatAffected), effect(initEffect) { }
+        Stat getStatAffected() const {
+            return statAffected;
+        }
+        int getEffect() const {
+            return effect;
+        }
         void print() const {
             cout << "Potion:" << endl;
             Item::print();
@@ -86,76 +96,18 @@ class Potion : public Item {
 
 //price = effect*30
 
-//Ενα  ξόρκι  (Spell)  αντιπροσωπεύει  μια  μαγική  επίθεση  που  μπορεί  να  εκτελέσει  κάποιος  ήρωας. ́Ενα ξόρκι έχει όνομα, τιμή και κάποιο ελάχιστο
-//επίπεδο στο οποίο πρέπει να βρίσκεται ο ήρωας για να  το  χρησιμοποιήσει.    ́Ενα  ξόρκι  έχει  ένα  εύρος  ζημιάς  που  μπορεί  να  προκαλέσει  καθώς 
-//και  ένα ποσό μαγικής ενέργειας που απαιτεί για να εκτελεστεί. Μετά την εκτέλεση, το ποσό αυτό της μαγικής ενέργειας αφαιρείται από τον ήρωα.
-//Το επίπεδο της ζημιάς που προκαλεί ένα ξόρκι εξαρτάται από την τιμή της επιδεξιότητας του ήρωα και πάντα βρίσκεται στο εύρος που έχει καθοριστεί. 
-
-class Spell {
-    std::string name;
-    int price;
-    int minLevel;
-    int minDamage;
-    int maxDamage;
-    int magicCost;
-    public:
-        Spell(const char* initName, int initPrice, int initMinLevel, int initMinDamage, int initMaxDamagm, int initMagicCost)
-        :   name(initName), price(initPrice), minLevel(initMinLevel), minDamage(initMinDamage), maxDamage(initMinDamage), magicCost(initMagicCost) { }
-        virtual void print() const {
-            cout << "Name:       " << name << endl;
-            cout << "Price:      " << price << endl;
-            cout << "Min level:  " << minLevel << endl;
-            cout << "Min damage: " << minDamage << endl;
-            cout << "Max damage: " << maxDamage << endl;
-            cout << "Magic cost: " << magicCost << endl;
-        }
-};
-
-//price = 10*(mindamage+maxdamage)/2
-//magiccost = 2*(mindamage+maxdamage)/2
-
-//Ενα ξόρκι πάγου(IceSpell) είναι ένα ξόρκι το οποίο, εκτός από τη ζημιά που προκαλεί, μειώνει και το εύρος ζημιάς του αντιπάλου για κάποιους γύρους.
-
-class IceSpell : public Spell {
-    public:
-        virtual void print() const {
-            cout << "Ice spell:" << endl;
-            Spell::print();
-        }
-};
-
-//Ενα ξόρκι φωτιάς (FireSpell) είναι ένα ξόρκι το οποίο,  εκτός απότη ζημιά που προκαλεί, μειώνει και το ποσό άμυνας του αντιπάλου για κάποιους γύρους. 
-
-class FireSpell : public Spell {
-    public:
-        virtual void print() const {
-            cout << "Fire spell:" << endl;
-            Spell::print();
-        }
-}; 
-
-//Ενα ξόρκι ηλεκτρισμού (LightingSpell) είναι ένα ξόρκι το οποίο, εκτός από τη ζημιά που προκαλεί, μειώνει καιτην πιθανότητα να αποφύγει μια επίθεση ο
-//αντίπαλος για κάποιους γύρους.
-
-class LightingSpell : public Spell {
-    public:
-        virtual void print() const {
-            cout << "Lighting spell:" << endl;
-            Spell::print();
-        }
-}; 
-
 //Ενα ζωντανό ον (Living) αντιπροσωπεύει μια ζωντανή οντότητα του κόσμου του παιχνιδιού.
 //Εχει ένα  όνομα,  κάποιο  επίπεδο  (level)  καθώς  και  ένα  ποσό  ζωτικής  ενέργειας  (healthPower).
 //Οταν  ηζωτική  ενέργεια  του  φτάσει  στο  μηδέν,  το  ζωντανό  ον  λιποθυμάει.
 
 class Living {
-    std::string name;
-    int level;
-    int healthPower;
-    int maxHealthPower;
+    protected:
+        std::string name;
+        int level;
+        int healthPower;
+        int maxHealthPower;
     public:
-        Living(const char* initName, int initLevel) : name(initName), level(initLevel), healthPower(50), maxHealthPower(50) { }
+        Living(const char* initName, int initLevel) : name(initName), level(initLevel), healthPower(30), maxHealthPower(30) { }
         virtual void print() const {
             cout << "Name:       " << name << endl;
             cout << "Level:      " << level << endl;
@@ -189,6 +141,226 @@ class Living {
         }
 };
 
+//Ενα  τέρας  (Monster)  είναι  ένα  ζωντανό  ον.
+//Εχει  ένα  εύρος  ζημιάς  που  μπορεί  να  προκαλέσει σε κάθε επίθεση του, ένα ποσό άμυνας το οποίο αφαιρείται από τη ζημιά που δέχεται σε μια επίθεση
+//του αντιπάλου του, και μια πιθανότητα να αποφύγει κάποια επίθεση του αντιπάλου του.
+
+class StatusEffect {
+    int turns;
+    int effect;
+    public:
+        StatusEffect(int initEffect, int initTurns) : effect(initEffect), turns(initTurns) { }
+        bool passTurn() {
+            turns--;
+            if (turns == 0) {
+                return true;
+            }
+            return false;
+        }
+        int getEffect() const {
+            return effect;
+        }
+};
+
+class Monster : public Living {
+    int minDamage;
+    int maxDamage;
+    int defense;
+    int agility;
+    std::list<StatusEffect*> damageStatusEffects;
+    std::list<StatusEffect*> defenseStatusEffects;
+    std::list<StatusEffect*> agilityStatusEffects;
+    public:
+        Monster(const char* initName, int initLevel, int initMinDamage, int initMaxDamage, int initDefense, int initAgility)
+        :   Living(initName, initLevel), minDamage(initMinDamage), maxDamage(initMaxDamage), defense(initDefense), agility(initAgility) { }
+        ~Monster() {
+            for (std::list<StatusEffect*>::iterator it = damageStatusEffects.begin() ; it != damageStatusEffects.end() ; it++) {
+                delete *it;
+            }
+            for (std::list<StatusEffect*>::iterator it = defenseStatusEffects.begin() ; it != defenseStatusEffects.end() ; it++) {
+                delete *it;
+            }
+            for (std::list<StatusEffect*>::iterator it = agilityStatusEffects.begin() ; it != agilityStatusEffects.end() ; it++) {
+                delete *it;
+            }
+        }
+        virtual void print() const {
+            Living::print();
+            cout << "Min Damage: " << minDamage << endl;
+            cout << "Max Damage: " << maxDamage << endl;
+            cout << "Defense:    " << defense << endl;
+            cout << "Agility:    " << agility << endl;
+        }
+        void attack(Living& creature) {
+            int range = maxDamage - minDamage;
+            creature.gainDamage(minDamage + (rand() % (range + 1)));
+        }
+        void gainDamage(int damage) {
+            if ((rand() % (50 + agility)) < 50) {
+                if (damage > defense) {
+                    Living::gainDamage(damage - defense);
+                }
+            }
+            else {
+                cout << "Attack evaded!" << endl;
+            }
+        }
+        void gainDamageStatusEffect(int amount, int turns) {
+            minDamage += amount;
+            maxDamage += amount;
+            damageStatusEffects.push_back(new StatusEffect(amount, turns));
+        }
+        void gainDefenseStatusEffect(int amount, int turns) {
+            defense += amount;
+            defenseStatusEffects.push_back(new StatusEffect(amount, turns));
+        }
+        void gainAgilityStatusEffect(int amount, int turns) {
+            agility += amount;
+            agilityStatusEffects.push_back(new StatusEffect(amount, turns));
+        }
+        void endTurn() {
+            if (getHealthPower() != 0) {
+                recoverHealthPower(1);
+            }
+            for (std::list<StatusEffect*>::iterator it = damageStatusEffects.begin() ; it != damageStatusEffects.end() ; it++) {
+                if ((*it)->passTurn()) {
+                    minDamage -= (*it)->getEffect();
+                    maxDamage -= (*it)->getEffect();
+                    delete *it;
+                    it = damageStatusEffects.erase(it);
+                }
+            }
+            for (std::list<StatusEffect*>::iterator it = defenseStatusEffects.begin() ; it != defenseStatusEffects.end() ; it++) {
+                if ((*it)->passTurn()) {
+                    defense -= (*it)->getEffect();
+                    delete *it;
+                    it = defenseStatusEffects.erase(it);
+                }
+            }
+            for (std::list<StatusEffect*>::iterator it = agilityStatusEffects.begin() ; it != agilityStatusEffects.end() ; it++) {
+                if ((*it)->passTurn()) {
+                    agility -= (*it)->getEffect();
+                    delete *it;
+                    it = agilityStatusEffects.erase(it);
+                }
+            }
+        }
+};
+
+//Ενα  ξόρκι  (Spell)  αντιπροσωπεύει  μια  μαγική  επίθεση  που  μπορεί  να  εκτελέσει  κάποιος  ήρωας. ́Ενα ξόρκι έχει όνομα, τιμή και κάποιο ελάχιστο
+//επίπεδο στο οποίο πρέπει να βρίσκεται ο ήρωας για να  το  χρησιμοποιήσει.    ́Ενα  ξόρκι  έχει  ένα  εύρος  ζημιάς  που  μπορεί  να  προκαλέσει  καθώς 
+//και  ένα ποσό μαγικής ενέργειας που απαιτεί για να εκτελεστεί. Μετά την εκτέλεση, το ποσό αυτό της μαγικής ενέργειας αφαιρείται από τον ήρωα.
+//Το επίπεδο της ζημιάς που προκαλεί ένα ξόρκι εξαρτάται από την τιμή της επιδεξιότητας του ήρωα και πάντα βρίσκεται στο εύρος που έχει καθοριστεί.
+
+class Spell : public Item {
+    protected:
+        int minDamage;
+        int maxDamage;
+        int magicCost;
+    public:
+        Spell(const char* initName, int initMinDamage, int initMaxDamage, int initMagicCost)
+        :   Item(initName, std::max(5*(initMinDamage + initMaxDamage) - initMagicCost/5, 1), std::max((initMinDamage + initMaxDamage) - initMagicCost/5, 1)),
+        minDamage(initMinDamage), maxDamage(initMaxDamage), magicCost(initMagicCost) { }
+        virtual void print() const {
+            Item::print();
+            cout << "Min damage: " << minDamage << endl;
+            cout << "Max damage: " << maxDamage << endl;
+            cout << "Magic cost: " << magicCost << endl;
+        }
+        int getMagicCost() const {
+            return magicCost;
+        }
+        virtual void cast(Monster& enemy, int efficiency) const = 0;
+};
+
+//price = 10*(mindamage+maxdamage)/2
+//magiccost = 2*(mindamage+maxdamage)/2
+
+//Ενα ξόρκι πάγου(IceSpell) είναι ένα ξόρκι το οποίο, εκτός από τη ζημιά που προκαλεί, μειώνει και το εύρος ζημιάς του αντιπάλου για κάποιους γύρους.
+
+class IceSpell : public Spell {
+    public:
+        IceSpell(const char* initName, int initMinDamage, int initMaxDamage, int initMagicCost)
+        :   Spell(initName, initMinDamage, initMaxDamage, initMagicCost) { }
+        virtual void print() const {
+            cout << "Ice spell:" << endl;
+            Spell::print();
+        }
+        void cast(Monster& enemy, int efficiency) const {
+            int damage = std::max(minDamage, maxDamage*((efficiency)/(efficiency + 1)));
+            enemy.gainDamageStatusEffect(-1*damage, 3);
+        }
+};
+
+//Ενα ξόρκι φωτιάς (FireSpell) είναι ένα ξόρκι το οποίο,  εκτός απότη ζημιά που προκαλεί, μειώνει και το ποσό άμυνας του αντιπάλου για κάποιους γύρους. 
+
+class FireSpell : public Spell {
+    public:
+        FireSpell(const char* initName, int initMinDamage, int initMaxDamage, int initMagicCost)
+        :   Spell(initName, initMinDamage, initMaxDamage, initMagicCost) { }
+        virtual void print() const {
+            cout << "Fire spell:" << endl;
+            Spell::print();
+        }
+        void cast(Monster& enemy, int efficiency) const {
+            int damage = std::max(minDamage, maxDamage*((efficiency)/(efficiency + 1)));
+            enemy.gainDefenseStatusEffect(-1*damage, 3);
+        }
+}; 
+
+//Ενα ξόρκι ηλεκτρισμού (LightingSpell) είναι ένα ξόρκι το οποίο, εκτός από τη ζημιά που προκαλεί, μειώνει καιτην πιθανότητα να αποφύγει μια επίθεση ο
+//αντίπαλος για κάποιους γύρους.
+
+class LightingSpell : public Spell {
+    public:
+        LightingSpell(const char* initName, int initMinDamage, int initMaxDamage, int initMagicCost)
+        :   Spell(initName, initMinDamage, initMaxDamage, initMagicCost) { }
+        virtual void print() const {
+            cout << "Lighting spell:" << endl;
+            Spell::print();
+        }
+        void cast(Monster& enemy, int efficiency) const {
+            int damage = std::max(minDamage, maxDamage*((efficiency)/(efficiency + 1)));
+            enemy.gainAgilityStatusEffect(-1*damage, 3);
+        }
+};
+
+//Ενας δράκος(Dragon) είναι ένα τέρας που είναι ευνοημένο στο εύρος ζημιάς που μπορεί να προκαλέσει.
+
+class Dragon : public Monster {
+    public:
+        Dragon(const char* initName, int initLevel)
+        :   Monster(initName, initLevel, 3*initLevel, 6*initLevel, 2*initLevel, 2*initLevel) { }
+        void print() const {
+            cout << "Type:       Dragon" << endl;
+            Monster::print();
+        }
+};
+
+//Ενα ον με  εξωσκελετό  (Exoskeleton)  είναι  ένα  τέρας  που  είναι  ευνοημένο  στο  ποσό  άμυνας  που  διαθέτει.
+
+class Exoskeleton : public Monster {
+    public:
+        Exoskeleton(const char* initName, int initLevel)
+        :   Monster(initName, initLevel, 1*initLevel, 2*initLevel, 6*initLevel - 2, 2*initLevel) { }
+        void print() const {
+            cout << "Type:       Exoskeleton" << endl;
+            Monster::print();
+        }
+};
+
+//Ενα  πνεύμα  (Spirit)  είναι  ένα  τέρας  που  είναι  ευνοημένο  στο  πόσο  συχνά  αποφεύγει  επιθέσεις  του αντιπάλου του.
+
+class Spirit : public Monster {
+    public:
+        Spirit(const char* initName, int initLevel)
+        :   Monster(initName, initLevel, 1*initLevel, 2*initLevel, 2*initLevel, 6*initLevel) { }
+        void print() const {
+            cout << "Type:       Spirit" << endl;
+            Monster::print();
+        }
+};
+
 //Ενας ήρωας (Hero) είναι έναζωντανό ον.
 //Εχει ένα ποσό μαγικής ενέργειας (magicPower), καθώς και κάποια χαρακτηριστικάπου επηρεάζουν την ικανότητα του στη μάχη.
 //Ενας ήρωας έχει κάποια τιμή δύναμης (strength), κάποια τιμή επιδεξιότητας (dexterity) καθώς και κάποια τιμή ευκινησίας (agility).
@@ -207,13 +379,13 @@ class Hero : public Living {
         int agility;
         int money;
         int experience;
-        Weapon* leftHandWeapon;
-        Weapon* rightHandWeapon;
+        Weapon* firstWeapon;
+        Weapon* secondWeapon;
         Armor* armor;
     public:
         Hero(const char* initName, int strengthInit, int dexterityInit, int agilityInit)
         :   Living(initName, 1), magicPower(100), maxMagicPower(100),  strength(strengthInit), dexterity(dexterityInit),
-        agility(agilityInit), money(100), experience(0), leftHandWeapon(NULL), rightHandWeapon(NULL), armor(NULL) { }
+        agility(agilityInit), money(100), experience(0), firstWeapon(NULL), secondWeapon(NULL), armor(NULL) { }
         virtual void print() const {
             Living::print();
             cout << "MP:         " << magicPower << endl;
@@ -262,6 +434,36 @@ class Hero : public Living {
             }
             else {
                 return false;
+            }
+        }
+        void use(Potion& potion) {
+            if (potion.getStatAffected() == strengthStat) {
+                strength += potion.getEffect();
+            }
+            else if (potion.getStatAffected() == dexterityStat) {
+                dexterity += potion.getEffect();
+            }
+            else if (potion.getStatAffected() == agilityStat) {
+                agility += potion.getEffect();
+            }
+        }
+        bool castSpell(const Spell& spell, Monster& enemy) {
+            if (spell.getMagicCost() > magicPower) {
+                cout << "Not enough magic power" << endl;
+                return false;
+            }
+            if (spell.getMinLevel() > level) {
+                cout << "Not high enough level to cast this spell" << endl;
+                return false;
+            }
+            spell.cast(enemy, dexterity);
+            magicPower -= spell.getMagicCost();
+            return true;
+        }
+        void endTurn() {
+            if (getHealthPower() != 0) {
+                recoverHealthPower(1);
+                recoverMagicPower(1);
             }
         }
 };
@@ -316,77 +518,6 @@ class Paladin : public Hero {
         }
 };
 
-//Ενα  τέρας  (Monster)  είναι  ένα  ζωντανό  ον.
-//Εχει  ένα  εύρος  ζημιάς  που  μπορεί  να  προκαλέσει σε κάθε επίθεση του, ένα ποσό άμυνας το οποίο αφαιρείται από τη ζημιά που δέχεται σε μια επίθεση
-//του αντιπάλου του, και μια πιθανότητα να αποφύγει κάποια επίθεση του αντιπάλου του.
-
-class Monster : public Living {
-    int minDamage;
-    int maxDamage;
-    int defense;
-    int agility;
-    public:
-        Monster(const char* initName, int initLevel, int initMinDamage, int initMaxDamage, int initDefense, int initAgility)
-        :   Living(initName, initLevel), minDamage(initMinDamage), maxDamage(initMaxDamage), defense(initDefense), agility(initAgility) { }
-        virtual void print() const {
-            Living::print();
-            cout << "Min Damage: " << minDamage << endl;
-            cout << "Max Damage: " << maxDamage << endl;
-            cout << "Defense:    " << defense << endl;
-            cout << "Agility:    " << agility << endl;
-        }
-        void attack(Living& creature) {
-            int range = maxDamage - minDamage;
-            creature.gainDamage(minDamage + (rand() % (range + 1)));
-        }
-        void gainDamage(int damage) {
-            if ((rand() % (50 + agility)) < 50) {
-                if (damage > defense) {
-                    Living::gainDamage(damage - defense);
-                }
-            }
-            else {
-                cout << "Attack evaded!" << endl;
-            }
-        }
-};
-
-//Ενας δράκος(Dragon) είναι ένα τέρας που είναι ευνοημένο στο εύρος ζημιάς που μπορεί να προκαλέσει.
-
-class Dragon : public Monster {
-    public:
-        Dragon(const char* initName, int initLevel)
-        :   Monster(initName, initLevel, 3*initLevel, 6*initLevel, 2*initLevel, 2*initLevel) { }
-        void print() const {
-            cout << "Type:       Dragon" << endl;
-            Monster::print();
-        }
-};
-
-//Ενα ον με  εξωσκελετό  (Exoskeleton)  είναι  ένα  τέρας  που  είναι  ευνοημένο  στο  ποσό  άμυνας  που  διαθέτει.
-
-class Exoskeleton : public Monster {
-    public:
-        Exoskeleton(const char* initName, int initLevel)
-        :   Monster(initName, initLevel, 1*initLevel, 2*initLevel, 6*initLevel - 2, 2*initLevel) { }
-        void print() const {
-            cout << "Type:       Exoskeleton" << endl;
-            Monster::print();
-        }
-};
-
-//Ενα  πνεύμα  (Spirit)  είναι  ένα  τέρας  που  είναι  ευνοημένο  στο  πόσο  συχνά  αποφεύγει  επιθέσεις  του αντιπάλου του.
-
-class Spirit : public Monster {
-    public:
-        Spirit(const char* initName, int initLevel)
-        :   Monster(initName, initLevel, 1*initLevel, 2*initLevel, 2*initLevel, 6*initLevel) { }
-        void print() const {
-            cout << "Type:       Spirit" << endl;
-            Monster::print();
-        }
-};
-
 enum Square { nonAccesible, market, common };
 
 enum HeroType { warrior, sorcerer, paladin };
@@ -402,8 +533,7 @@ class Grid {
     Hero** party;
     int heroNum;
     int position[2];
-    Item* marketItems[45];
-    Spell* marketSpells[15];
+    Item* marketItems[60];
     vector<Weapon*> ownedWeapons;
     vector<Armor*> ownedArmors;
     vector<Potion*> ownedPotions;
@@ -455,7 +585,16 @@ class Grid {
                 marketItems[i] = new Potion(potionNames[i - 30], dexterityStat, i - 34);
             }
             for (int i = 40 ; i < 45 ; i++) {
-                marketItems[i] = new Potion(potionNames[i], agilityStat, i - 39);
+                marketItems[i] = new Potion(potionNames[i - 30], agilityStat, i - 39);
+            }
+            for (int i = 45 ; i < 50 ; i++) {
+                marketItems[i] = new IceSpell(spellNames[i - 45], i - 44, 2*(i - 44), (i - 43)*5);
+            }
+            for (int i = 50 ; i < 55 ; i++) {
+                marketItems[i] = new FireSpell(spellNames[i - 45], i - 49, 2*(i - 49), (i - 48)*5);
+            }
+            for (int i = 55 ; i < 60 ; i++) {
+                marketItems[i] = new LightingSpell(spellNames[i - 45], i - 54, 2*(i - 54), (i - 53)*5);
             }
         }
         ~Grid() {
@@ -467,7 +606,7 @@ class Grid {
                 delete party[i];
             }
             delete[] party;
-            for (int i = 0 ; i < 45 ; i++) {
+            for (int i = 0 ; i < 60 ; i++) {
                 delete marketItems[i];
             }
         }
@@ -634,14 +773,18 @@ class Grid {
         void equip() {
             
         }
-        void use() {
+        void use(Hero* hero = NULL) {
+            if (ownedPotions.size() == 0) {
+                cout << "No potions owned" << endl;
+                return;
+            }
             cout << "Which potion to use?" << endl;
             int i = 0;
             for (vector<Potion*>::iterator iter = ownedPotions.begin(); iter != ownedPotions.end() ; iter++, i++) {
                 cout << "\n(" << i + 1 << ")" << endl;
                 (*iter)->print();
             }
-            Potion* toUse;
+            int potionPos;
             while (true) {
                 string input;
                 cin >> input;
@@ -649,30 +792,39 @@ class Grid {
                     return;
                 }
                 else if ((atoi(input.c_str()) > 0) && (atoi(input.c_str()) <= ownedPotions.size())) {
-                    toUse = ownedPotions[(atoi(input.c_str() - 1];
+                    potionPos = atoi(input.c_str()) - 1;
                     break;
                 }
                 else {
                     cout << "Invalid input" << endl;
                 }
             }
-            int heroPos = 0;
-            if (heroNum > 1) {
-                do {
-                    cout << "Which hero should use it? (1-" << heroNum << ")" << endl;
-                    cin.clear();
-                    cin.ignore(1000, '\n');
-                    cin >> heroPos;
-                    heroPos--;
-                }   while ((heroPos < 0) || (heroPos >= heroNum));
+            Potion* toUse = ownedPotions[potionPos];
+            if (hero == NULL) {
+                int heroPos = 0;
+                if (heroNum > 1) {
+                    do {
+                        cout << "Which hero should use it? (1-" << heroNum << ")" << endl;
+                        cin.clear();
+                        cin.ignore(1000, '\n');
+                        cin >> heroPos;
+                        heroPos--;
+                    }   while ((heroPos < 0) || (heroPos >= heroNum));
+                }
+                hero = party[heroPos];
             }
-            party[heroPos]->use(toUse);
-        }
-        void buy() {
-            if (grid[position[0]][position[1]] != market) {
-                cout << "Can't buy outiside of the market" << endl;
+            if (hero->getLevel() < toUse->getMinLevel()) {
+                cout << "The hero's level is to low to use the potion" << endl;
                 return;
             }
+            hero->use(*toUse);
+            ownedPotions.erase(ownedPotions.begin() + potionPos);
+        }
+        void buy() {
+//            if (grid[position[0]][position[1]] != market) {
+  //              cout << "Can't buy outiside of the market" << endl;
+    //            return;
+      //      }
             while (true) {
                 string input;
                 int offset;
@@ -691,14 +843,18 @@ class Grid {
                         offset = 30;
                         break;
                     }
+                    else if (!input.compare("spell")) {
+                        offset = 45;
+                        break;
+                    }
                     else {
                         cout << "Invalid input" << endl;
                     }
                 }
                 cout << "Choose one:" << endl;
-                for (int i = offset ; i < 15 + offset ; i++) {
+                for (int i = 0 ; i < 15 ; i++) {
                     cout << "\n(" << i + 1 << ")" << endl;
-                    marketItems[i]->print();
+                    marketItems[i + offset]->print();
                 }
                 while (true) {
                     cin >> input;
@@ -725,13 +881,20 @@ class Grid {
                             }
                         }
                         if (offset == 0) {
+                            cout << "buying weapon" << endl;
                             ownedWeapons.push_back((Weapon*) toBuy);
                         }
-                        else if (offset == 1) {
+                        else if (offset == 15) {
+                            cout << "buying armor" << endl;
                             ownedArmors.push_back((Armor*) toBuy);
                         }
-                        else if (offset == 2) {
+                        else if (offset == 30) {
+                            cout << "buying potion" << endl;
                             ownedPotions.push_back((Potion*) toBuy);
+                        }
+                        else if (offset == 45) {
+                            cout << "buying spell" << endl;
+                            ownedSpells.push_back((Spell*) toBuy);
                         }
                         break;
                     }
@@ -767,7 +930,7 @@ class Grid {
                 averageHeroLevel += party[i]->getLevel();
             }
             averageHeroLevel /= heroNum;
-            int monsterNum = heroNum + (rand() % 3);
+            int monsterNum = heroNum + (rand() % 2);
             Monster** monsters = new Monster*[monsterNum];
             for (int i = 0 ; i < monsterNum ; i++) {
                 if (!(rand() % 3)) {
@@ -805,8 +968,8 @@ class Grid {
                 for (int i = 0 ; i < heroNum ; i++) {
                     if (party[i]->getHealthPower() != 0) {
                         lost = false;
-                        cout << "What should " << party[i]->getName() << " do?" << endl;
                         while (true) {
+                            cout << "What should " << party[i]->getName() << " do?" << endl;
                             cin >> input;
                             if (!input.compare("attack")) {
                                 int numInput;
@@ -827,6 +990,59 @@ class Grid {
                                 }
                                 party[i]->attack(*monsters[numInput - 1]);
                                 break;
+                            }
+                            else if (!input.compare("use")) {
+                                use(party[i]);
+                                break;
+                            }
+                            else if (!input.compare("castSpell")) {
+                                if (ownedSpells.size() == 0) {
+                                    cout << "No spells owned" << endl;
+                                    return;
+                                }
+                                cout << "Which spell to use?" << endl;
+                                int j = 0;
+                                for (vector<Spell*>::iterator iter = ownedSpells.begin(); iter != ownedSpells.end() ; iter++, j++) {
+                                    cout << "\n(" << j + 1 << ")" << endl;
+                                    (*iter)->print();
+                                }
+                                int spellPos;
+                                while (true) {
+                                    string input;
+                                    cin >> input;
+                                    if ((atoi(input.c_str()) > 0) && (atoi(input.c_str()) <= ownedSpells.size())) {
+                                        spellPos = atoi(input.c_str()) - 1;
+                                        break;
+                                    }
+                                    else {
+                                        cout << "Invalid input" << endl;
+                                    }
+                                }
+                                Spell* toUse = ownedSpells[spellPos];
+                                if (party[i]->getLevel() < toUse->getMinLevel()) {
+                                    cout << "The hero's level is to low to cast the spell" << endl;
+                                }
+                                else {
+                                    int numInput;
+                                    cout << "Which monster to use the spell on?" << endl;
+                                    for (int j = 0 ; j < monsterNum ; j++) {
+                                        cout << "(" << j + 1 << ") " << monsters[j]->getName() << ", HP: " << monsters[j]->getHealthPower() <<  endl;
+                                    }
+                                    while (true) {
+                                        cin.clear();
+                                        cin.ignore(1000, '\n');
+                                        cin >> numInput;
+                                        if ((numInput > 0) && (numInput <= monsterNum)) {
+                                            break;
+                                        }
+                                        else {
+                                            cout << "Invalid input" << endl;
+                                        }
+                                    }
+                                    if (party[i]->castSpell(*toUse, *monsters[numInput - 1])) {
+                                        break;
+                                    }
+                                }
                             }
                             else {
                                 cout << "Unknown command" << endl;
@@ -849,15 +1065,10 @@ class Grid {
                     break;
                 }
                 for (int i = 0 ; i < heroNum ; i++) {
-                    if (party[i]->getHealthPower() != 0) {
-                        party[i]->recoverHealthPower(1);
-                        party[i]->recoverMagicPower(1);
-                    }
+                    party[i]->endTurn();
                 }
                 for (int i = 0 ; i < monsterNum ; i++) {
-                    if (monsters[i]->getHealthPower() != 0) {
-                        monsters[i]->recoverHealthPower(1);
-                    }
+                    monsters[i]->endTurn();
                 }
             }
             if (won) {
