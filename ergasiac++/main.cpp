@@ -53,7 +53,7 @@ class Weapon : public Item {
         int getDamage() const {
             return damage;
         }
-        bool isTwoHanded() {
+        bool isTwoHanded() const {
             return twoHanded;
         }
 };
@@ -202,7 +202,7 @@ class Monster : public Living {
             cout << "Defense:    " << defense << '\n';
             cout << "Agility:    " << agility << endl;
         }
-        void attack(Living& creature) {
+        void attack(Living& creature) const {
             int range = maxDamage - minDamage;
             creature.gainDamage(minDamage + (rand() % (range + 1)));
         }
@@ -439,7 +439,7 @@ class Hero : public Living {
                 magicPower = maxMagicPower;
             }
         }
-        void attack(Living& creature) {
+        void attack(Living& creature) const {
             creature.gainDamage(strength + (weapon != NULL ? weapon->getDamage()*weapon->isTwoHanded() : 0));
         }
         void gainDamage(int damage) {
@@ -773,7 +773,7 @@ class Grid {
                 battle();
             }
         }
-        void displayMap() {
+        void displayMap() const {
             for (int i = 0 ; i < width ; i++) {
                 for (int j = 0 ; j < height ; j++) {
                     cout << "Square " << i << ", " << j << ":" << '\n';
@@ -793,13 +793,13 @@ class Grid {
                 }
             }
         }
-        void displayHeroStats() {
+        void displayHeroStats() const {
             for (int i = 0 ; i < heroNum ; i++) {
                 cout << i + 1 << (i == 0 ? "st" : (i == 1 ? "nd" : "rd")) << " hero's stats: " << endl;
                 party[i]->print();
             }
         }
-        void checkInventory() {
+        void checkInventory() const {
             cout << "Weapons in inventory:" << endl;
             for (vector<Weapon*>::iterator iter = ownedWeapons.begin() ; iter != ownedWeapons.end() ; iter++) {
                 (*iter)->print();
@@ -1291,5 +1291,3 @@ int main(int argc, char* argv[]) {
     Grid grid(width, height, heroTypes, heroNum);
     grid.playGame();
 }
-
-//itemise/polymorphise everything
