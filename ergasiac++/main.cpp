@@ -162,7 +162,7 @@ class StatusEffect {
     public:
         StatusEffect(int initEffect, int initTurns) : effect(initEffect), turns(initTurns) { }
         bool passTurn() {
-            turns--;
+            --turns;
             if (turns == 0) {
                 return true;
             }
@@ -185,13 +185,13 @@ class Monster : public Living {
         Monster(const char* initName, int initLevel, int initMinDamage, int initMaxDamage, int initDefense, int initAgility)
         :   Living(initName, initLevel), minDamage(initMinDamage), maxDamage(initMaxDamage), defense(initDefense), agility(initAgility) { }
         ~Monster() {
-            for (std::list<StatusEffect*>::iterator it = damageStatusEffects.begin() ; it != damageStatusEffects.end() ; it++) {
+            for (std::list<StatusEffect*>::iterator it = damageStatusEffects.begin() ; it != damageStatusEffects.end() ; ++it) {
                 delete *it;
             }
-            for (std::list<StatusEffect*>::iterator it = defenseStatusEffects.begin() ; it != defenseStatusEffects.end() ; it++) {
+            for (std::list<StatusEffect*>::iterator it = defenseStatusEffects.begin() ; it != defenseStatusEffects.end() ; ++it) {
                 delete *it;
             }
-            for (std::list<StatusEffect*>::iterator it = agilityStatusEffects.begin() ; it != agilityStatusEffects.end() ; it++) {
+            for (std::list<StatusEffect*>::iterator it = agilityStatusEffects.begin() ; it != agilityStatusEffects.end() ; ++it) {
                 delete *it;
             }
         }
@@ -231,7 +231,7 @@ class Monster : public Living {
             if (getHealthPower() != 0) {
                 recoverHealthPower(1);
             }
-            for (std::list<StatusEffect*>::iterator it = damageStatusEffects.begin() ; it != damageStatusEffects.end() ; it++) {
+            for (std::list<StatusEffect*>::iterator it = damageStatusEffects.begin() ; it != damageStatusEffects.end() ; ++it) {
                 if ((*it)->passTurn()) {
                     minDamage -= (*it)->getEffect();
                     maxDamage -= (*it)->getEffect();
@@ -239,14 +239,14 @@ class Monster : public Living {
                     it = damageStatusEffects.erase(it);
                 }
             }
-            for (std::list<StatusEffect*>::iterator it = defenseStatusEffects.begin() ; it != defenseStatusEffects.end() ; it++) {
+            for (std::list<StatusEffect*>::iterator it = defenseStatusEffects.begin() ; it != defenseStatusEffects.end() ; ++it) {
                 if ((*it)->passTurn()) {
                     defense -= (*it)->getEffect();
                     delete *it;
                     it = defenseStatusEffects.erase(it);
                 }
             }
-            for (std::list<StatusEffect*>::iterator it = agilityStatusEffects.begin() ; it != agilityStatusEffects.end() ; it++) {
+            for (std::list<StatusEffect*>::iterator it = agilityStatusEffects.begin() ; it != agilityStatusEffects.end() ; ++it) {
                 if ((*it)->passTurn()) {
                     agility -= (*it)->getEffect();
                     delete *it;
@@ -528,7 +528,7 @@ class Warrior : public Hero {
         }
         void levelUp() {
             strength += 3;
-            dexterity++;
+            ++dexterity;
             agility += 3;
         }
 };
@@ -543,7 +543,7 @@ class Sorcerer : public Hero {
             Hero::print();
         }
         void levelUp() {
-            strength++;
+            ++strength;
             dexterity += 3;
             agility += 3;
         }
@@ -561,7 +561,7 @@ class Paladin : public Hero {
         void levelUp() {
             strength += 3;
             dexterity += 3;
-            agility++;
+            ++agility;
         }
 };
 
@@ -589,12 +589,12 @@ class Grid {
         Grid(int initWidth, int initHeight, HeroType* heroTypes, int heroNumInit)
         :   width(initWidth), height(initHeight), heroNum(heroNumInit), position{0,0} {
             grid = new Square*[width];
-            for (int i = 0 ; i < width ; i++) {
+            for (int i = 0 ; i < width ; ++i) {
                 grid[i] = new Square[height];
             }
             srand(time(NULL));
-            for (int i = 0 ; i < width ; i++) {
-                for (int j = 0 ; j < height ; j++) {
+            for (int i = 0 ; i < width ; ++i) {
+                for (int j = 0 ; j < height ; ++j) {
                     if (!(rand() % 5)) {
                         grid[i][j] = nonAccesible;
                     }
@@ -608,7 +608,7 @@ class Grid {
             }
             grid[0][0] = common;
             party = new Hero*[heroNum];
-            for (int i = 0 ; i < heroNum ; i++) {
+            for (int i = 0 ; i < heroNum ; ++i) {
                 if (heroTypes[i] == warrior) {
                     party[i] = new Warrior(names[rand() % 98]);
                 }
@@ -619,41 +619,41 @@ class Grid {
                     party[i] = new Paladin(names[rand() % 98]);
                 }
             }
-            for (int i = 0 ; i < 15 ; i++) {
+            for (int i = 0 ; i < 15 ; ++i) {
                 marketItems[i] = new Weapon(weaponNames[i], i + 1, i/10);
             }
-            for (int i = 15 ; i < 30 ; i++) {
+            for (int i = 15 ; i < 30 ; ++i) {
                 marketItems[i] = new Armor(armorNames[i - 15], i - 14);
             }
-            for (int i = 30 ; i < 35 ; i++) {
+            for (int i = 30 ; i < 35 ; ++i) {
                 marketItems[i] = new Potion(potionNames[i - 30], strengthStat, i - 29);
             }
-            for (int i = 35 ; i < 40 ; i++) {
+            for (int i = 35 ; i < 40 ; ++i) {
                 marketItems[i] = new Potion(potionNames[i - 30], dexterityStat, i - 34);
             }
-            for (int i = 40 ; i < 45 ; i++) {
+            for (int i = 40 ; i < 45 ; ++i) {
                 marketItems[i] = new Potion(potionNames[i - 30], agilityStat, i - 39);
             }
-            for (int i = 45 ; i < 50 ; i++) {
+            for (int i = 45 ; i < 50 ; ++i) {
                 marketItems[i] = new IceSpell(spellNames[i - 45], i - 44, 2*(i - 44), (i - 43)*5);
             }
-            for (int i = 50 ; i < 55 ; i++) {
+            for (int i = 50 ; i < 55 ; ++i) {
                 marketItems[i] = new FireSpell(spellNames[i - 45], i - 49, 2*(i - 49), (i - 48)*5);
             }
-            for (int i = 55 ; i < 60 ; i++) {
+            for (int i = 55 ; i < 60 ; ++i) {
                 marketItems[i] = new LightingSpell(spellNames[i - 45], i - 54, 2*(i - 54), (i - 53)*5);
             }
         }
         ~Grid() {
-            for (int i = 0 ; i < width ; i++) {
+            for (int i = 0 ; i < width ; ++i) {
                 delete[] grid[i];
             }
             delete[] grid;
-            for (int i = 0 ; i < heroNum ; i++) {
+            for (int i = 0 ; i < heroNum ; ++i) {
                 delete party[i];
             }
             delete[] party;
-            for (int i = 0 ; i < 60 ; i++) {
+            for (int i = 0 ; i < 60 ; ++i) {
                 delete marketItems[i];
             }
         }
@@ -708,7 +708,7 @@ class Grid {
                 }
                 //*
                 else if (!input.compare("up")) {
-                    for (int i = 0 ; i < heroNum ; i++) {
+                    for (int i = 0 ; i < heroNum ; ++i) {
                         party[i]->addExperience(20);
                     }
                 }
@@ -733,7 +733,7 @@ class Grid {
                     cout << "Can't move into non-accessible square" << endl;
                     return;
                 }
-                position[1]++;
+                ++position[1];
             }
             else if (direction == downDir) {
                 if (position[1] - 1 < 0) {
@@ -744,7 +744,7 @@ class Grid {
                     cout << "Can't move into non-accessible square" << endl;
                     return;
                 }
-                position[1]--;
+                --position[1];
             }
             else if (direction == leftDir) {
                 if (position[0] - 1 < 0) {
@@ -755,7 +755,7 @@ class Grid {
                     cout << "Can't move into non-accessible square" << endl;
                     return;
                 }
-                position[0]--;
+                --position[0];
             }
             else if (direction == rightDir) {
                 if (position[0] + 1 >= width) {
@@ -766,7 +766,7 @@ class Grid {
                     cout << "Can't move into non-accessible square" << endl;
                     return;
                 }
-                position[0]++;
+                ++position[0];
             }
             cout << "pos: " << position[0] << " " << position[1] << endl;
             if ((grid[position[0]][position[1]] == common) && !(rand() % 4)) {
@@ -774,8 +774,8 @@ class Grid {
             }
         }
         void displayMap() const {
-            for (int i = 0 ; i < width ; i++) {
-                for (int j = 0 ; j < height ; j++) {
+            for (int i = 0 ; i < width ; ++i) {
+                for (int j = 0 ; j < height ; ++j) {
                     cout << "Square " << i << ", " << j << ":" << '\n';
                     if (grid[i][j] == nonAccesible) {
                         cout << "Non-accessible" << '\n';
@@ -794,26 +794,26 @@ class Grid {
             }
         }
         void displayHeroStats() const {
-            for (int i = 0 ; i < heroNum ; i++) {
+            for (int i = 0 ; i < heroNum ; ++i) {
                 cout << i + 1 << (i == 0 ? "st" : (i == 1 ? "nd" : "rd")) << " hero's stats: " << endl;
                 party[i]->print();
             }
         }
         void checkInventory() const {
             cout << "Weapons in inventory:" << endl;
-            for (vector<Weapon*>::const_iterator iter = ownedWeapons.begin() ; iter != ownedWeapons.end() ; iter++) {
+            for (vector<Weapon*>::const_iterator iter = ownedWeapons.begin() ; iter != ownedWeapons.end() ; ++iter) {
                 (*iter)->print();
             }
             cout << "Armors in inventory:" << endl;
-            for (vector<Armor*>::const_iterator iter = ownedArmors.begin() ; iter != ownedArmors.end() ; iter++) {
+            for (vector<Armor*>::const_iterator iter = ownedArmors.begin() ; iter != ownedArmors.end() ; ++iter) {
                 (*iter)->print();
             }
             cout << "Potions in inventory:" << endl;
-            for (vector<Potion*>::const_iterator iter = ownedPotions.begin() ; iter != ownedPotions.end() ; iter++) {
+            for (vector<Potion*>::const_iterator iter = ownedPotions.begin() ; iter != ownedPotions.end() ; ++iter) {
                 (*iter)->print();
             }
             cout << "Spells in inventory:" << endl;
-            for (vector<Spell*>::const_iterator iter = ownedSpells.begin() ; iter != ownedSpells.end() ; iter++) {
+            for (vector<Spell*>::const_iterator iter = ownedSpells.begin() ; iter != ownedSpells.end() ; ++iter) {
                 (*iter)->print();
             }
         }
@@ -829,7 +829,7 @@ class Grid {
                     }
                     cout << "Which weapon to equip?" << endl;
                     int i = 0;
-                    for (vector<Weapon*>::iterator iter = ownedWeapons.begin() ; iter != ownedWeapons.end() ; iter++, i++) {
+                    for (vector<Weapon*>::iterator iter = ownedWeapons.begin() ; iter != ownedWeapons.end() ; ++iter, ++i) {
                         cout << "\n(" << i + 1 << ")" << endl;
                         (*iter)->print();
                     }
@@ -856,7 +856,7 @@ class Grid {
                                 cin.clear();
                                 cin.ignore(1000, '\n');
                                 cin >> heroPos;
-                                heroPos--;
+                                --heroPos;
                             }   while ((heroPos < 0) || (heroPos >= heroNum));
                         }
                         hero = party[heroPos];
@@ -880,7 +880,7 @@ class Grid {
                     }
                     cout << "Which armor to equip?" << endl;
                     int i = 0;
-                    for (vector<Armor*>::iterator iter = ownedArmors.begin() ; iter != ownedArmors.end() ; iter++, i++) {
+                    for (vector<Armor*>::iterator iter = ownedArmors.begin() ; iter != ownedArmors.end() ; ++iter, ++i) {
                         cout << "\n(" << i + 1 << ")" << endl;
                         (*iter)->print();
                     }
@@ -907,7 +907,7 @@ class Grid {
                                 cin.clear();
                                 cin.ignore(1000, '\n');
                                 cin >> heroPos;
-                                heroPos--;
+                                --heroPos;
                             }   while ((heroPos < 0) || (heroPos >= heroNum));
                         }
                         hero = party[heroPos];
@@ -939,7 +939,7 @@ class Grid {
             }
             cout << "Which potion to use?" << endl;
             int i = 0;
-            for (vector<Potion*>::iterator iter = ownedPotions.begin() ; iter != ownedPotions.end() ; iter++, i++) {
+            for (vector<Potion*>::iterator iter = ownedPotions.begin() ; iter != ownedPotions.end() ; ++iter, ++i) {
                 cout << "\n(" << i + 1 << ")" << endl;
                 (*iter)->print();
             }
@@ -967,7 +967,7 @@ class Grid {
                         cin.clear();
                         cin.ignore(1000, '\n');
                         cin >> heroPos;
-                        heroPos--;
+                        --heroPos;
                     }   while ((heroPos < 0) || (heroPos >= heroNum));
                 }
                 hero = party[heroPos];
@@ -1012,7 +1012,7 @@ class Grid {
                     }
                 }
                 cout << "Choose one:" << endl;
-                for (int i = 0 ; i < 15 ; i++) {
+                for (int i = 0 ; i < 15 ; ++i) {
                     cout << "\n(" << i + 1 << ")" << endl;
                     marketItems[i + offset]->print();
                 }
@@ -1024,14 +1024,14 @@ class Grid {
                     else if ((atoi(input.c_str()) > 0) && (atoi(input.c_str()) <= 15)) {
                         Item* toBuy = marketItems[atoi(input.c_str()) - 1 + offset];
                         int totalMoney = 0, toPay = toBuy->getPrice();
-                        for (int i = 0 ; i < heroNum ; i++) {
+                        for (int i = 0 ; i < heroNum ; ++i) {
                             totalMoney += party[i]->getMoney();
                         }
                         if (totalMoney < toPay) {
                             cout << "Not enough money" << endl;
                             break;
                         }
-                        for (int i = 0 ; i < heroNum ; i++) {
+                        for (int i = 0 ; i < heroNum ; ++i) {
                             if (party[i]->spendMoney(toPay)) {
                                 break;
                             }
@@ -1086,13 +1086,13 @@ class Grid {
         void battle() {
             cout << "Battle!" << endl;
             int averageHeroLevel = 0;
-            for (int i = 0 ; i < heroNum ; i++) {
+            for (int i = 0 ; i < heroNum ; ++i) {
                 averageHeroLevel += party[i]->getLevel();
             }
             averageHeroLevel /= heroNum;
             int monsterNum = heroNum + (rand() % 2);
             Monster** monsters = new Monster*[monsterNum];
-            for (int i = 0 ; i < monsterNum ; i++) {
+            for (int i = 0 ; i < monsterNum ; ++i) {
                 if (!(rand() % 3)) {
                     monsters[i] = new Dragon(names[rand() % 98], averageHeroLevel);
                 }
@@ -1111,7 +1111,7 @@ class Grid {
                     cin >> input;
                     if (!input.compare("y")) {
                         displayHeroStats();
-                        for (int i = 0 ; i < monsterNum ; i++) {
+                        for (int i = 0 ; i < monsterNum ; ++i) {
                             cout << i + 1 << (i == 0 ? "st" : (i == 1 ? "nd" : (i == 2 ? "rd" : "th"))) << " monster's stats: " << endl;
                             monsters[i]->print();
                         }
@@ -1125,7 +1125,7 @@ class Grid {
                     }
                 }
                 won = true, lost = true;
-                for (int i = 0 ; i < heroNum ; i++) {
+                for (int i = 0 ; i < heroNum ; ++i) {
                     if (party[i]->getHealthPower() != 0) {
                         lost = false;
                         while (true) {
@@ -1134,7 +1134,7 @@ class Grid {
                             if (!input.compare("attack")) {
                                 int numInput;
                                 cout << "Which monster to attack?" << endl;
-                                for (int j = 0 ; j < monsterNum ; j++) {
+                                for (int j = 0 ; j < monsterNum ; ++j) {
                                     cout << "(" << j + 1 << ") " << monsters[j]->getName() << ", HP: " << monsters[j]->getHealthPower() <<  endl;
                                 }
                                 while (true) {
@@ -1158,7 +1158,7 @@ class Grid {
                                 }
                                 cout << "Which spell to cast?" << endl;
                                 int j = 0;
-                                for (vector<Spell*>::iterator iter = ownedSpells.begin() ; iter != ownedSpells.end() ; iter++, j++) {
+                                for (vector<Spell*>::iterator iter = ownedSpells.begin() ; iter != ownedSpells.end() ; ++iter, ++j) {
                                     cout << "\n(" << j + 1 << ")" << endl;
                                     (*iter)->print();
                                 }
@@ -1177,7 +1177,7 @@ class Grid {
                                 Spell* toUse = ownedSpells[spellPos];
                                 int numInput;
                                 cout << "Which monster to cast the spell on?" << endl;
-                                for (int j = 0 ; j < monsterNum ; j++) {
+                                for (int j = 0 ; j < monsterNum ; ++j) {
                                     cout << "(" << j + 1 << ") " << monsters[j]->getName() << ", HP: " << monsters[j]->getHealthPower() <<  endl;
                                 }
                                 while (true) {
@@ -1211,10 +1211,10 @@ class Grid {
                         }
                     }
                 }
-                for (int i = 0 ; i < monsterNum ; i++) {
+                for (int i = 0 ; i < monsterNum ; ++i) {
                     if (monsters[i]->getHealthPower() != 0) {
                         won = false;
-                        for (int j = 0 ; j < heroNum; j++) {
+                        for (int j = 0 ; j < heroNum; ++j) {
                             if (party[j]->getHealthPower() != 0) {
                                 monsters[i]->attack(*party[j]);
                                 break;
@@ -1225,32 +1225,32 @@ class Grid {
                 if (won || lost) {
                     break;
                 }
-                for (int i = 0 ; i < heroNum ; i++) {
+                for (int i = 0 ; i < heroNum ; ++i) {
                     party[i]->endTurn();
                 }
-                for (int i = 0 ; i < monsterNum ; i++) {
+                for (int i = 0 ; i < monsterNum ; ++i) {
                     monsters[i]->endTurn();
                 }
             }
             if (won) {
                 cout << "The party has won!" << endl;
-                for (int i = 0 ; i < heroNum ; i++) {
+                for (int i = 0 ; i < heroNum ; ++i) {
                     party[i]->setMoney(party[i]->getMoney() + party[i]->getLevel()*10 + monsterNum*20);
                     party[i]->addExperience(party[i]->getLevel()*5 + monsterNum*20);
                 }
             }
             else {
                 cout << "The party has lost!" << endl;
-                for (int i = 0 ; i < heroNum ; i++) {
+                for (int i = 0 ; i < heroNum ; ++i) {
                     party[i]->setMoney(party[i]->getMoney() / 2);
                 }
             }
-            for (int i = 0 ; i < heroNum ; i++) {
+            for (int i = 0 ; i < heroNum ; ++i) {
                 if (party[i]->getHealthPower() == 0) {
                     party[i]->recoverHealthPower(party[i]->getMaxHealthPower() / 2);
                 }
             }
-            for (int i = 0 ; i < monsterNum ; i++) {
+            for (int i = 0 ; i < monsterNum ; ++i) {
                 delete monsters[i];
             }
             delete[] monsters;
@@ -1271,7 +1271,7 @@ int main(int argc, char* argv[]) {
     } while (heroNum < 1 || heroNum > 3);
     HeroType heroTypes[heroNum];
     string input;
-    for (int i = 0 ; i  < heroNum ; i++) {
+    for (int i = 0 ; i  < heroNum ; ++i) {
         cout << "Enter type of " << i + 1 << (i == 0 ? "st" : (i == 1 ? "nd" : "rd")) << " hero:" << endl;
         cin >> input;
         if (!input.compare("warrior")) {
@@ -1285,7 +1285,7 @@ int main(int argc, char* argv[]) {
         }
         else {
             cout << "Invalid input" << endl;
-            i--;
+            --i;
         }
     }
     Grid grid(width, height, heroTypes, heroNum);
