@@ -801,19 +801,19 @@ class Grid {
         }
         void checkInventory() const {
             cout << "Weapons in inventory:" << endl;
-            for (vector<Weapon*>::iterator iter = ownedWeapons.begin() ; iter != ownedWeapons.end() ; iter++) {
+            for (vector<Weapon*>::const_iterator iter = ownedWeapons.begin() ; iter != ownedWeapons.end() ; iter++) {
                 (*iter)->print();
             }
             cout << "Armors in inventory:" << endl;
-            for (vector<Armor*>::iterator iter = ownedArmors.begin() ; iter != ownedArmors.end() ; iter++) {
+            for (vector<Armor*>::const_iterator iter = ownedArmors.begin() ; iter != ownedArmors.end() ; iter++) {
                 (*iter)->print();
             }
             cout << "Potions in inventory:" << endl;
-            for (vector<Potion*>::iterator iter = ownedPotions.begin() ; iter != ownedPotions.end() ; iter++) {
+            for (vector<Potion*>::const_iterator iter = ownedPotions.begin() ; iter != ownedPotions.end() ; iter++) {
                 (*iter)->print();
             }
             cout << "Spells in inventory:" << endl;
-            for (vector<Spell*>::iterator iter = ownedSpells.begin() ; iter != ownedSpells.end() ; iter++) {
+            for (vector<Spell*>::const_iterator iter = ownedSpells.begin() ; iter != ownedSpells.end() ; iter++) {
                 (*iter)->print();
             }
         }
