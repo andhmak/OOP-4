@@ -61,56 +61,21 @@ int Armor::getDefense() const {
 //Ενα φίλτρο(Potion) είναι ένα αντικείμενο το οποίο όταν το χρησιμοποιεί ένας ήρωας, αυξάνει κάποιο στατιστικό του
 //κατά  κάποιο  ποσό.  Τα  φίλτρα  είναι  μίας  χρήσης,  πράγμα  που  σημαίνει  ότι  μετά  τη  χρήση  τους,δεν μπορούν να ξαναχρησιμοποιηθούν.
 
-Potion::Potion(const char* initName, int initEffect)
-:   Item(initName, 30*initEffect, initEffect/2 + 1), effect(initEffect) { }
+Potion::Potion(const char* initName, Stat initStatAffected, int initEffect)
+:   Item(initName, 30*initEffect, initEffect/2 + 1), statAffected(initStatAffected), effect(initEffect) { }
+Stat Potion::getStatAffected() const {
+    return statAffected;
+}
+int Potion::getEffect() const {
+    return effect;
+}
 void Potion::print() const {
     std::cout << "Potion:" << '\n';
     Item::print();
+    std::cout << (statAffected == strengthStat ? "Strength: " : (statAffected == dexterityStat) ? "Dexterity:" : "Agility:  ") << "  +" << effect << std::endl;
 }
 
 //price = effect*30
-
-bool StrengthPotion::useOn(Hero* hero) {
-    if (hero->getLevel() < minLevel) {
-        std::cout << "The hero's level is too low to use this potion" << std::endl;
-        return false;
-    }
-    hero->addStrength(effect);
-    return true;
-}
-
-void StrengthPotion::print() const {
-    Potion::print();
-    std::cout << "Strength:   +" << effect << std::endl;
-}
-
-bool DexterityPotion::useOn(Hero* hero) {
-    if (hero->getLevel() < minLevel) {
-        std::cout << "The hero's level is too low to use this potion" << std::endl;
-        return false;
-    }
-    hero->addDexterity(effect);
-    return true;
-}
-
-void DexterityPotion::print() const {
-    Potion::print();
-    std::cout << "Dexterity:  +" << effect << std::endl;
-}
-
-bool AgilityPotion::useOn(Hero* hero) {
-    if (hero->getLevel() < minLevel) {
-        std::cout << "The hero's level is too low to use this potion" << std::endl;
-        return false;
-    }
-    hero->addAgility(effect);
-    return true;
-}
-
-void AgilityPotion::print() const {
-    Potion::print();
-    std::cout << "Agility:    +" << effect << std::endl;
-}
 
 //Ενα  ξόρκι  (Spell)  αντιπροσωπεύει  μια  μαγική  επίθεση  που  μπορεί  να  εκτελέσει  κάποιος  ήρωας. ́Ενα ξόρκι έχει όνομα, τιμή και κάποιο ελάχιστο
 //επίπεδο στο οποίο πρέπει να βρίσκεται ο ήρωας για να  το  χρησιμοποιήσει.    ́Ενα  ξόρκι  έχει  ένα  εύρος  ζημιάς  που  μπορεί  να  προκαλέσει  καθώς 
@@ -286,7 +251,20 @@ bool Hero::spendMoney (int amount) {
     }
 }
 bool Hero::use(Potion& potion) {
-    return potion.useOn(this);
+    if (potion.getMinLevel() > level) {
+        std::cout << "The hero's level is too low to use this potion" << std::endl;
+        return false;
+    }
+    if (potion.getStatAffected() == strengthStat) {
+        strength += potion.getEffect();
+    }
+    else if (potion.getStatAffected() == dexterityStat) {
+        dexterity += potion.getEffect();
+    }
+    else if (potion.getStatAffected() == agilityStat) {
+        agility += potion.getEffect();
+    }
+    return true;
 }
 bool Hero::castSpell(const Spell& spell, Monster& enemy) {
     if (spell.getMagicCost() > magicPower) {
@@ -527,13 +505,13 @@ Grid::Grid(int initWidth, int initHeight, HeroType* heroTypes, int heroNumInit)
         marketItems[i] = new Armor(armorNames[i - 15], i - 14);
     }
     for (int i = 30 ; i < 35 ; ++i) {
-        marketItems[i] = new StrengthPotion(potionNames[i - 30], i - 29);
+        marketItems[i] = new Potion(potionNames[i - 30], strengthStat, i - 29);
     }
     for (int i = 35 ; i < 40 ; ++i) {
-        marketItems[i] = new DexterityPotion(potionNames[i - 30], i - 34);
+        marketItems[i] = new Potion(potionNames[i - 30], dexterityStat, i - 34);
     }
     for (int i = 40 ; i < 45 ; ++i) {
-        marketItems[i] = new AgilityPotion(potionNames[i - 30], i - 39);
+        marketItems[i] = new Potion(potionNames[i - 30], agilityStat, i - 39);
     }
     for (int i = 45 ; i < 50 ; ++i) {
         marketItems[i] = new IceSpell(spellNames[i - 45], i - 44, 2*(i - 44), (i - 43)*5);

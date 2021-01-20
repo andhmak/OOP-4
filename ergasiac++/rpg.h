@@ -12,10 +12,9 @@
 //   μία  τιμή  αγοράς  και  έχει  και  κάποιο  ελάχιστο  επίπεδοστο  οποίο  πρέπει  να  βρίσκεται  ο  ήρωας  για  να  το  χρησιμοποιήσει.z
 
 class Item {
-    protected:
-        std::string name;
-        int price;
-        int minLevel;
+    std::string name;
+    int price;
+    int minLevel;
     public:
         Item(const char* initName, int initPrice, int initMinLevel);
         virtual void print() const;
@@ -50,42 +49,22 @@ class Armor : public Item {
 
 //price = 15*defense
 
-class Hero;
+enum Stat { strengthStat, dexterityStat, agilityStat };
 
 //Ενα φίλτρο(Potion) είναι ένα αντικείμενο το οποίο όταν το χρησιμοποιεί ένας ήρωας, αυξάνει κάποιο στατιστικό του
 //κατά  κάποιο  ποσό.  Τα  φίλτρα  είναι  μίας  χρήσης,  πράγμα  που  σημαίνει  ότι  μετά  τη  χρήση  τους,δεν μπορούν να ξαναχρησιμοποιηθούν.
 
 class Potion : public Item {
-    protected:
-        int effect;
+    Stat statAffected;
+    int effect;
     public:
-        Potion(const char* initName, int initEffect);
-        virtual bool useOn(Hero* hero) = 0;
-        virtual void print() const;
+        Potion(const char* initName, Stat initStatAffected, int initEffect);
+        Stat getStatAffected() const;
+        int getEffect() const;
+        void print() const;
 };
 
 //price = effect*30
-
-class StrengthPotion : public Potion {
-    public:
-        StrengthPotion(const char* initName, int initEffect) : Potion(initName, initEffect) { }
-        bool useOn(Hero* hero);
-        void print() const;
-};
-
-class DexterityPotion : public Potion {
-    public:
-        DexterityPotion(const char* initName, int initEffect) : Potion(initName, initEffect) { }
-        bool useOn(Hero* hero);
-        void print() const;
-};
-
-class AgilityPotion : public Potion {
-    public:
-        AgilityPotion(const char* initName, int initEffect) : Potion(initName, initEffect) { }
-        bool useOn(Hero* hero);
-        void print() const;
-};
 
 //Ενα  ξόρκι  (Spell)  αντιπροσωπεύει  μια  μαγική  επίθεση  που  μπορεί  να  εκτελέσει  κάποιος  ήρωας. ́Ενα ξόρκι έχει όνομα, τιμή και κάποιο ελάχιστο
 //επίπεδο στο οποίο πρέπει να βρίσκεται ο ήρωας για να  το  χρησιμοποιήσει.    ́Ενα  ξόρκι  έχει  ένα  εύρος  ζημιάς  που  μπορεί  να  προκαλέσει  καθώς 
@@ -183,9 +162,6 @@ class Hero : public Living {
         virtual void print() const;
         void addExperience(int amount);
         virtual void levelUp() = 0;
-        void addStrength(int amount) { strength += amount; }
-        void addDexterity(int amount) { dexterity += amount; }
-        void addAgility(int amount) { agility += amount; }
         int getMoney() const;
         void setMoney(int newMoney);
         int getMagicPower() const;
