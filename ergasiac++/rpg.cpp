@@ -71,7 +71,7 @@ void Potion::print() const {
 //price = effect*30
 
 bool StrengthPotion::useOn(Hero* hero) {
-    if (hero->getLevel() < minLevel) {
+    if (hero->getLevel() < getMinLevel()) {
         std::cout << "The hero's level is too low to use this potion" << std::endl;
         return false;
     }
@@ -85,7 +85,7 @@ void StrengthPotion::print() const {
 }
 
 bool DexterityPotion::useOn(Hero* hero) {
-    if (hero->getLevel() < minLevel) {
+    if (hero->getLevel() < getMinLevel()) {
         std::cout << "The hero's level is too low to use this potion" << std::endl;
         return false;
     }
@@ -99,7 +99,7 @@ void DexterityPotion::print() const {
 }
 
 bool AgilityPotion::useOn(Hero* hero) {
-    if (hero->getLevel() < minLevel) {
+    if (hero->getLevel() < getMinLevel()) {
         std::cout << "The hero's level is too low to use this potion" << std::endl;
         return false;
     }
@@ -249,9 +249,12 @@ void Hero::print() const {
 void Hero::addExperience(int amount) {
     Hero::experience += amount;
     if (experience >= 100) {
-        experience -= 100;
-        levelUp();
+        levelUp(experience/100);
+        experience -= 100*(experience/100);
     }
+}
+void Hero::levelUp(int times) {
+    level += times;
 }
 int Hero::getMoney() const {
     return money;
@@ -339,10 +342,11 @@ void Warrior::print() const {
     std::cout << "Type:       Warrior" << std::endl;
     Hero::print();
 }
-void Warrior::levelUp() {
-    strength += 3;
-    ++dexterity;
-    agility += 3;
+void Warrior::levelUp(int times) {
+    Hero::levelUp(times);
+    strength += 3*times;
+    dexterity += times;
+    agility += 3*times;
 }
 
 // Ενας  μάγος  (Sorcerer)  είναι  ένας  ήρωας  που  είναι  ευνοημένος στον τομέα της επιδεξιότητας και της ευκινησίας.
@@ -352,10 +356,11 @@ void Sorcerer::print() const {
     std::cout << "Type:       Sorcerer" << std::endl;
     Hero::print();
 }
-void Sorcerer::levelUp() {
-    ++strength;
-    dexterity += 3;
-    agility += 3;
+void Sorcerer::levelUp(int times) {
+    Hero::levelUp(times);
+    strength += times;
+    dexterity += 3*times;
+    agility += 3*times;
 }
 
 //Ενας ιππότης (Paladin) είναι ένας ήρωας που είναιευνοημένος στον τομέα της δύναμης και της επιδεξιότητας.
@@ -365,10 +370,11 @@ void Paladin::print() const {
     std::cout << "Type:       Paladin" << std::endl;
     Hero::print();
 }
-void Paladin::levelUp() {
-    strength += 3;
-    dexterity += 3;
-    ++agility;
+void Paladin::levelUp(int times) {
+    Hero::levelUp(times);
+    strength += 3*times;
+    dexterity += 3*times;
+    agility += times;
 }
 
 //Ενα  τέρας  (Monster)  είναι  ένα  ζωντανό  ον.
@@ -607,10 +613,13 @@ void Grid::playGame() {
         else if (!input.compare("buy")) {
             buy();
         }
+        else if (!input.compare("sell")) {
+            sell();
+        }
         /*
         else if (!input.compare("up")) {
             for (int i = 0 ; i < heroNum ; ++i) {
-                party[i]->addExperience(20);
+                party[i]->addExperience(210);
             }
         }
         */
@@ -753,7 +762,7 @@ bool Grid::equip(Hero* hero) {
                 int heroPos = 0;
                 if (heroNum > 1) {
                     do {
-                        std::cout << "Which hero should use it? (1-" << heroNum << ")" << std::endl;
+                        std::cout << "Which hero should equip it? (1-" << heroNum << ")" << std::endl;
                         std::cin.clear();
                         std::cin.ignore(1000, '\n');
                         std::cin >> heroPos;
@@ -804,7 +813,7 @@ bool Grid::equip(Hero* hero) {
                 int heroPos = 0;
                 if (heroNum > 1) {
                     do {
-                        std::cout << "Which hero should use it? (1-" << heroNum << ")" << std::endl;
+                        std::cout << "Which hero should equip it? (1-" << heroNum << ")" << std::endl;
                         std::cin.clear();
                         std::cin.ignore(1000, '\n');
                         std::cin >> heroPos;
@@ -882,10 +891,10 @@ bool Grid::use(Hero* hero) {
     }
 }
 void Grid::buy() {
-    if (grid[position[0]][position[1]] != market) {
-        std::cout << "Can't buy outiside of the market" << std::endl;
-        return;
-    }
+//    if (grid[position[0]][position[1]] != market) {
+//        std::cout << "Can't buy outiside of the market" << std::endl;
+//        return;
+//    }
     while (true) {
         std::string input;
         int offset;
@@ -965,6 +974,157 @@ void Grid::buy() {
         }
         bool done;
         std::cout << "Buy more? (y/n)" << std::endl;
+        while (true) {
+            std::cin >> input;
+            if (!input.compare("y")) {
+                done = false;
+                break;
+            }
+            else if (!input.compare("n")) {
+                done = true;
+                break;
+            }
+            else {
+                std::cout << "Invalid input" << std::endl;
+            }
+        }
+        if (done) {
+            break;
+        }
+    }
+}
+void Grid::sell() {
+//    if (grid[position[0]][position[1]] != market) {
+//        std::cout << "Can't sell outiside of the market" << std::endl;
+//        return;
+//    }
+    while (true) {
+        std::string input;
+        std::cout << "What to sell?" << std::endl;
+        while (true) {
+            std::cin >> input;
+            if (!input.compare("weapon")) {
+                if (ownedWeapons.size() == 0) {
+                    std::cout << "No weapons owned" << std::endl;
+                    return;
+                }
+                std::cout << "Which weapon to sell?" << std::endl;
+                int i = 0;
+                for (std::vector<Weapon*>::iterator iter = ownedWeapons.begin() ; iter != ownedWeapons.end() ; ++iter, ++i) {
+                    std::cout << "\n(" << i + 1 << ")" << std::endl;
+                    (*iter)->print();
+                }
+                int weaponPos;
+                while (true) {
+                    std::cin >> input;
+                    if (!input.compare("back")) {
+                        return;
+                    }
+                    else if ((atoi(input.c_str()) > 0) && (atoi(input.c_str()) <= ownedWeapons.size())) {
+                        weaponPos = atoi(input.c_str()) - 1;
+                        break;
+                    }
+                    else {
+                        std::cout << "Invalid input" << std::endl;
+                    }
+                }
+                party[0]->spendMoney(-1*(ownedWeapons[weaponPos]->getPrice()/2));
+                ownedWeapons.erase(ownedWeapons.begin() + weaponPos);
+                break;
+            }
+            else if (!input.compare("armor")) {
+                if (ownedArmors.size() == 0) {
+                    std::cout << "No armors owned" << std::endl;
+                    return;
+                }
+                std::cout << "Which armor to sell?" << std::endl;
+                int i = 0;
+                for (std::vector<Armor*>::iterator iter = ownedArmors.begin() ; iter != ownedArmors.end() ; ++iter, ++i) {
+                    std::cout << "\n(" << i + 1 << ")" << std::endl;
+                    (*iter)->print();
+                }
+                int armorPos;
+                while (true) {
+                    std::cin >> input;
+                    if (!input.compare("back")) {
+                        return;
+                    }
+                    else if ((atoi(input.c_str()) > 0) && (atoi(input.c_str()) <= ownedArmors.size())) {
+                        armorPos = atoi(input.c_str()) - 1;
+                        break;
+                    }
+                    else {
+                        std::cout << "Invalid input" << std::endl;
+                    }
+                }
+                party[0]->spendMoney(-1*(ownedArmors[armorPos]->getPrice()/2));
+                ownedArmors.erase(ownedArmors.begin() + armorPos);
+                break;
+            }
+            else if (!input.compare("potion")) {
+                if (ownedPotions.size() == 0) {
+                    std::cout << "No potions owned" << std::endl;
+                    return;
+                }
+                std::cout << "Which potion to sell?" << std::endl;
+                int i = 0;
+                for (std::vector<Potion*>::iterator iter = ownedPotions.begin() ; iter != ownedPotions.end() ; ++iter, ++i) {
+                    std::cout << "\n(" << i + 1 << ")" << std::endl;
+                    (*iter)->print();
+                }
+                int potionPos;
+                while (true) {
+                    std::cin >> input;
+                    if (!input.compare("back")) {
+                        return;
+                    }
+                    else if ((atoi(input.c_str()) > 0) && (atoi(input.c_str()) <= ownedPotions.size())) {
+                        potionPos = atoi(input.c_str()) - 1;
+                        break;
+                    }
+                    else {
+                        std::cout << "Invalid input" << std::endl;
+                    }
+                }
+                party[0]->spendMoney(-1*(ownedPotions[potionPos]->getPrice()/2));
+                ownedPotions.erase(ownedPotions.begin() + potionPos);
+                break;
+            }
+            else if (!input.compare("spell")) {
+                if (ownedSpells.size() == 0) {
+                    std::cout << "No spells owned" << std::endl;
+                    return;
+                }
+                std::cout << "Which spell to sell?" << std::endl;
+                int i = 0;
+                for (std::vector<Spell*>::iterator iter = ownedSpells.begin() ; iter != ownedSpells.end() ; ++iter, ++i) {
+                    std::cout << "\n(" << i + 1 << ")" << std::endl;
+                    (*iter)->print();
+                }
+                int spellPos;
+                while (true) {
+                    std::cin >> input;
+                    if (!input.compare("back")) {
+                        return;
+                    }
+                    else if ((atoi(input.c_str()) > 0) && (atoi(input.c_str()) <= ownedSpells.size())) {
+                        spellPos = atoi(input.c_str()) - 1;
+                        break;
+                    }
+                    else {
+                        std::cout << "Invalid input" << std::endl;
+                    }
+                }
+                party[0]->spendMoney(-1*(ownedSpells[spellPos]->getPrice()/2));
+                ownedSpells.erase(ownedSpells.begin() + spellPos);
+                break;
+            }
+            else {
+                std::cout << "Invalid input" << std::endl;
+            }
+        }
+        bool done;
+        std::cout << "Sell more? (y/n)" << std::endl;
         while (true) {
             std::cin >> input;
             if (!input.compare("y")) {
@@ -1075,7 +1235,7 @@ void Grid::battle() {
                                 std::cout << "Invalid input" << std::endl;
                             }
                         }
-                        Spell* toUse = ownedSpells[spellPos];
+                        Spell* toCast = ownedSpells[spellPos];
                         int numInput;
                         std::cout << "Which monster to cast the spell on?" << std::endl;
                         for (int j = 0 ; j < monsterNum ; ++j) {
@@ -1092,7 +1252,7 @@ void Grid::battle() {
                                 std::cout << "Invalid input" << std::endl;
                             }
                         }
-                        if (party[i]->castSpell(*toUse, *monsters[numInput - 1])) {
+                        if (party[i]->castSpell(*toCast, *monsters[numInput - 1])) {
                             break;
                         }
                     }

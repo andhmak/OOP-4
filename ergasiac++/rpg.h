@@ -12,10 +12,9 @@
 //   μία  τιμή  αγοράς  και  έχει  και  κάποιο  ελάχιστο  επίπεδοστο  οποίο  πρέπει  να  βρίσκεται  ο  ήρωας  για  να  το  χρησιμοποιήσει.z
 
 class Item {
-    protected:
-        std::string name;
-        int price;
-        int minLevel;
+    std::string name;
+    int price;
+    int minLevel;
     public:
         Item(const char* initName, int initPrice, int initMinLevel);
         virtual void print() const;
@@ -182,7 +181,7 @@ class Hero : public Living {
         Hero(const char* initName, int strengthInit, int dexterityInit, int agilityInit);
         virtual void print() const;
         void addExperience(int amount);
-        virtual void levelUp() = 0;
+        virtual void levelUp(int times);
         void addStrength(int amount) { strength += amount; }
         void addDexterity(int amount) { dexterity += amount; }
         void addAgility(int amount) { agility += amount; }
@@ -208,7 +207,7 @@ class Warrior : public Hero {
     public:
         Warrior(const char* initName);
         void print() const;
-        void levelUp();
+        void levelUp(int times);
 };
 
 // Ενας  μάγος  (Sorcerer)  είναι  ένας  ήρωας  που  είναι  ευνοημένος στον τομέα της επιδεξιότητας και της ευκινησίας.
@@ -217,7 +216,7 @@ class Sorcerer : public Hero {
     public:
         Sorcerer(const char* initName);
         void print() const;
-        void levelUp();
+        void levelUp(int times);
 };
 
 //Ενας ιππότης (Paladin) είναι ένας ήρωας που είναιευνοημένος στον τομέα της δύναμης και της επιδεξιότητας.
@@ -226,7 +225,7 @@ class Paladin : public Hero {
     public:
         Paladin(const char* initName);
         void print() const;
-        void levelUp();
+        void levelUp(int times);
 };
 
 //Ενα  τέρας  (Monster)  είναι  ένα  ζωντανό  ον.
@@ -315,5 +314,6 @@ class Grid {
         bool equip(Hero* hero = NULL);
         bool use(Hero* hero = NULL);
         void buy();
+        void sell();
         void battle();
 };
