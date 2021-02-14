@@ -891,10 +891,10 @@ bool Grid::use(Hero* hero) {
     }
 }
 void Grid::buy() {
-//    if (grid[position[0]][position[1]] != market) {
-//        std::cout << "Can't buy outiside of the market" << std::endl;
-//        return;
-//    }
+    if (grid[position[0]][position[1]] != market) {
+        std::cout << "Can't buy outiside of the market" << std::endl;
+        return;
+    }
     while (true) {
         std::string input;
         int offset;
@@ -994,10 +994,10 @@ void Grid::buy() {
     }
 }
 void Grid::sell() {
-//    if (grid[position[0]][position[1]] != market) {
-//        std::cout << "Can't sell outiside of the market" << std::endl;
-//        return;
-//    }
+    if (grid[position[0]][position[1]] != market) {
+        std::cout << "Can't sell outiside of the market" << std::endl;
+        return;
+    }
     while (true) {
         std::string input;
         std::cout << "What to sell?" << std::endl;
