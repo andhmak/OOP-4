@@ -13,8 +13,20 @@ int main(int argc, char* argv[]) {
     int width, height, heroNum;
     cout << "Enter grid width:" << endl;
     cin >> width;
-    cout << "Enter grid height:" << endl;
-    cin >> height;
+    if (width < 1) {
+        do {
+            cout << "Enter grid width:" << endl;
+            cin.clear();
+            cin.ignore(1000, '\n');
+            cin >> width;
+        } while (width < 1);
+    }
+    do {
+        cout << "Enter grid height:" << endl;
+        cin.clear();
+        cin.ignore(1000, '\n');
+        cin >> height;
+    } while (height < 1);
     do {
         cout << "Enter number of heroes in party (between 1 and 3):" << endl;
         cin.clear();

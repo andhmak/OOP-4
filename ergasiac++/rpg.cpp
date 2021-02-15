@@ -493,28 +493,7 @@ void Spirit::print() const {
     Monster::print();
 }
 
-Grid::Grid(int initWidth, int initHeight, HeroType* heroTypes, int heroNumInit)
-:   width(initWidth), height(initHeight), heroNum(heroNumInit), position{0,0} {
-    grid = new Square*[width];
-    for (int i = 0 ; i < width ; ++i) {
-        grid[i] = new Square[height];
-    }
-    srand(time(NULL));
-    for (int i = 0 ; i < width ; ++i) {
-        for (int j = 0 ; j < height ; ++j) {
-            if (!(rand() % 5)) {
-                grid[i][j] = nonAccesible;
-            }
-            else if (!(rand() % 3)) {
-                grid[i][j] = market;
-            }
-            else {
-                grid[i][j] = common;
-            }
-        }
-    }
-    grid[0][0] = common;
-    party = new Hero*[heroNum];
+Party::Party(HeroType* heroTypes, int heroNumInit) : heroNum(heroNumInit), party(new Hero*[heroNumInit]) {
     for (int i = 0 ; i < heroNum ; ++i) {
         if (heroTypes[i] == warrior) {
             party[i] = new Warrior(names[rand() % 98]);
@@ -526,208 +505,14 @@ Grid::Grid(int initWidth, int initHeight, HeroType* heroTypes, int heroNumInit)
             party[i] = new Paladin(names[rand() % 98]);
         }
     }
-    for (int i = 0 ; i < 15 ; ++i) {
-        marketItems[i] = new Weapon(weaponNames[i], i + 1, i/10);
-    }
-    for (int i = 15 ; i < 30 ; ++i) {
-        marketItems[i] = new Armor(armorNames[i - 15], i - 14);
-    }
-    for (int i = 30 ; i < 35 ; ++i) {
-        marketItems[i] = new StrengthPotion(potionNames[i - 30], i - 29);
-    }
-    for (int i = 35 ; i < 40 ; ++i) {
-        marketItems[i] = new DexterityPotion(potionNames[i - 30], i - 34);
-    }
-    for (int i = 40 ; i < 45 ; ++i) {
-        marketItems[i] = new AgilityPotion(potionNames[i - 30], i - 39);
-    }
-    for (int i = 45 ; i < 50 ; ++i) {
-        marketItems[i] = new IceSpell(spellNames[i - 45], i - 44, 2*(i - 44), (i - 43)*5);
-    }
-    for (int i = 50 ; i < 55 ; ++i) {
-        marketItems[i] = new FireSpell(spellNames[i - 45], i - 49, 2*(i - 49), (i - 48)*5);
-    }
-    for (int i = 55 ; i < 60 ; ++i) {
-        marketItems[i] = new LightingSpell(spellNames[i - 45], i - 54, 2*(i - 54), (i - 53)*5);
-    }
 }
-Grid::~Grid() {
-    for (int i = 0 ; i < width ; ++i) {
-        delete[] grid[i];
-    }
-    delete[] grid;
+Party::~Party() {
     for (int i = 0 ; i < heroNum ; ++i) {
         delete party[i];
     }
     delete[] party;
-    for (int i = 0 ; i < 60 ; ++i) {
-        delete marketItems[i];
-    }
 }
-void Grid::playGame() {
-    while (true) {
-        std::string input;
-        std::cin >> input;
-        if (!input.compare("quitGame")) {
-            break;
-        }
-        else if (!input.compare("move")) {
-            while (true) {
-                std::cin >> input;
-                if (!input.compare("up")) {
-                    move(upDir);
-                    break;
-                }
-                else if (!input.compare("down")) {
-                    move(downDir);
-                    break;
-                }
-                else if (!input.compare("left")) {
-                    move(leftDir);
-                    break;
-                }
-                else if (!input.compare("right")) {
-                    move(rightDir);
-                    break;
-                }
-                else {
-                    std::cout << "Not a valid direction" << std::endl;
-                }
-            }
-        }
-        else if (!input.compare("displayHeroStats")) {
-            displayHeroStats();
-        }
-        else if (!input.compare("checkInventory")) {
-            checkInventory();
-        }
-        else if (!input.compare("equip")) {
-            equip();
-        }
-        else if (!input.compare("use")) {
-            use();
-        }
-        else if (!input.compare("displayMap")) {
-            displayMap();
-        }
-        else if (!input.compare("buy")) {
-            buy();
-        }
-        else if (!input.compare("sell")) {
-            sell();
-        }
-        /*
-        else if (!input.compare("up")) {
-            for (int i = 0 ; i < heroNum ; ++i) {
-                party[i]->addExperience(210);
-            }
-        }
-        */
-        /*
-        else if (!input.compare("battle")) {
-            battle();
-        }
-        */
-        else {
-            std::cout << "Unknown command" << std::endl;
-        }
-    }
-}
-void Grid::move(Direction direction) {
-    if (direction == upDir) {
-        if (position[1] + 1 >= height) {
-            std::cout << "Can't move out of bounds" << std::endl;
-            return;
-        }
-        if (grid[position[0]][position[1] + 1] == nonAccesible) {
-            std::cout << "Can't move into non-accessible square" << std::endl;
-            return;
-        }
-        ++position[1];
-    }
-    else if (direction == downDir) {
-        if (position[1] - 1 < 0) {
-            std::cout << "Can't move out of bounds" << std::endl;
-            return;
-        }
-        if (grid[position[0]][position[1] - 1] == nonAccesible) {
-            std::cout << "Can't move into non-accessible square" << std::endl;
-            return;
-        }
-        --position[1];
-    }
-    else if (direction == leftDir) {
-        if (position[0] - 1 < 0) {
-            std::cout << "Can't move out of bounds" << std::endl;
-            return;
-        }
-        if (grid[position[0] - 1][position[1]] == nonAccesible) {
-            std::cout << "Can't move into non-accessible square" << std::endl;
-            return;
-        }
-        --position[0];
-    }
-    else if (direction == rightDir) {
-        if (position[0] + 1 >= width) {
-            std::cout << "Can't move out of bounds" << std::endl;
-            return;
-        }
-        if (grid[position[0] + 1][position[1]] == nonAccesible) {
-            std::cout << "Can't move into non-accessible square" << std::endl;
-            return;
-        }
-        ++position[0];
-    }
-    std::cout << "pos: " << position[0] << " " << position[1] << std::endl;
-    if ((grid[position[0]][position[1]] == common) && !(rand() % 4)) {
-        battle();
-    }
-}
-void Grid::displayMap() const {
-    for (int i = 0 ; i < width ; ++i) {
-        for (int j = 0 ; j < height ; ++j) {
-            std::cout << "Square " << i << ", " << j << ":" << '\n';
-            if (grid[i][j] == nonAccesible) {
-                std::cout << "Non-accessible" << '\n';
-            }
-            else if (grid[i][j] == market) {
-                std::cout << "Market" << '\n';
-            }
-            else {
-                std::cout << "Common" << '\n';
-            }
-            if ((i == position[0]) && (j == position[1])) {
-                std::cout << "The party is here" << '\n';
-            }
-            std::cout << std::endl;
-        }
-    }
-}
-void Grid::displayHeroStats() const {
-    for (int i = 0 ; i < heroNum ; ++i) {
-        std::cout << i + 1 << (i == 0 ? "st" : (i == 1 ? "nd" : "rd")) << " hero's stats: " << std::endl;
-        party[i]->print();
-    }
-}
-void Grid::checkInventory() const {
-    std::cout << "Weapons in inventory:" << std::endl;
-    for (std::vector<Weapon*>::const_iterator iter = ownedWeapons.begin() ; iter != ownedWeapons.end() ; ++iter) {
-        (*iter)->print();
-    }
-    std::cout << "Armors in inventory:" << std::endl;
-    for (std::vector<Armor*>::const_iterator iter = ownedArmors.begin() ; iter != ownedArmors.end() ; ++iter) {
-        (*iter)->print();
-    }
-    std::cout << "Potions in inventory:" << std::endl;
-    for (std::vector<Potion*>::const_iterator iter = ownedPotions.begin() ; iter != ownedPotions.end() ; ++iter) {
-        (*iter)->print();
-    }
-    std::cout << "Spells in inventory:" << std::endl;
-    for (std::vector<Spell*>::const_iterator iter = ownedSpells.begin() ; iter != ownedSpells.end() ; ++iter) {
-        (*iter)->print();
-    }
-}
-bool Grid::equip(Hero* hero) {
+bool Party::equip(Hero* hero) {
     std::cout << "What to equip?" << std::endl;
     while (true) {
         std::string input;
@@ -842,7 +627,7 @@ bool Grid::equip(Hero* hero) {
         }
     }
 }
-bool Grid::use(Hero* hero) {
+bool Party::use(Hero* hero) {
     if (ownedPotions.size() == 0) {
         std::cout << "No potions owned" << std::endl;
         return false;
@@ -890,114 +675,47 @@ bool Grid::use(Hero* hero) {
         return false;
     }
 }
-void Grid::buy() {
-    if (grid[position[0]][position[1]] != market) {
-        std::cout << "Can't buy outiside of the market" << std::endl;
-        return;
+bool Party::pay(int amount) {
+    int totalMoney = 0;
+    for (int i = 0 ; i < heroNum ; ++i) {
+        totalMoney += party[i]->getMoney();
     }
-    while (true) {
-        std::string input;
-        int offset;
-        std::cout << "What to buy?" << std::endl;
-        while (true) {
-            std::cin >> input;
-            if (!input.compare("weapon")) {
-                offset = 0;
-                break;
-            }
-            else if (!input.compare("armor")) {
-                offset = 15;
-                break;
-            }
-            else if (!input.compare("potion")) {
-                offset = 30;
-                break;
-            }
-            else if (!input.compare("spell")) {
-                offset = 45;
-                break;
-            }
-            else {
-                std::cout << "Invalid input" << std::endl;
-            }
-        }
-        std::cout << "Choose one:" << std::endl;
-        for (int i = 0 ; i < 15 ; ++i) {
-            std::cout << "\n(" << i + 1 << ")" << std::endl;
-            marketItems[i + offset]->print();
-        }
-        while (true) {
-            std::cin >> input;
-            if (!input.compare("back")) {
-                break;
-            }
-            else if ((atoi(input.c_str()) > 0) && (atoi(input.c_str()) <= 15)) {
-                Item* toBuy = marketItems[atoi(input.c_str()) - 1 + offset];
-                int totalMoney = 0, toPay = toBuy->getPrice();
-                for (int i = 0 ; i < heroNum ; ++i) {
-                    totalMoney += party[i]->getMoney();
-                }
-                if (totalMoney < toPay) {
-                    std::cout << "Not enough money" << std::endl;
-                    break;
-                }
-                for (int i = 0 ; i < heroNum ; ++i) {
-                    if (party[i]->spendMoney(toPay)) {
-                        break;
-                    }
-                    else {
-                        toPay -= party[i]->getMoney();
-                        party[i]->spendMoney(party[i]->getMoney());
-                    }
-                }
-                if (offset == 0) {
-                    std::cout << "buying weapon" << std::endl;
-                    ownedWeapons.push_back((Weapon*) toBuy);
-                }
-                else if (offset == 15) {
-                    std::cout << "buying armor" << std::endl;
-                    ownedArmors.push_back((Armor*) toBuy);
-                }
-                else if (offset == 30) {
-                    std::cout << "buying potion" << std::endl;
-                    ownedPotions.push_back((Potion*) toBuy);
-                }
-                else if (offset == 45) {
-                    std::cout << "buying spell" << std::endl;
-                    ownedSpells.push_back((Spell*) toBuy);
-                }
-                break;
-            }
-            else {
-                std::cout << "Invalid input" << std::endl;
-            }
-        }
-        bool done;
-        std::cout << "Buy more? (y/n)" << std::endl;
-        while (true) {
-            std::cin >> input;
-            if (!input.compare("y")) {
-                done = false;
-                break;
-            }
-            else if (!input.compare("n")) {
-                done = true;
-                break;
-            }
-            else {
-                std::cout << "Invalid input" << std::endl;
-            }
-        }
-        if (done) {
+    if (totalMoney < amount) {
+        std::cout << "Not enough money" << std::endl;
+        return false;
+    }
+    for (int i = 0 ; i < heroNum ; ++i) {
+        if (party[i]->spendMoney(amount)) {
             break;
         }
+        else {
+            amount -= party[i]->getMoney();
+            party[i]->spendMoney(party[i]->getMoney());
+        }
+    }
+    return true;
+}
+void Party::buy(Weapon* weapon) {
+    if (pay(weapon->getPrice())) {
+        ownedWeapons.push_back(weapon);
     }
 }
-void Grid::sell() {
-    if (grid[position[0]][position[1]] != market) {
-        std::cout << "Can't sell outiside of the market" << std::endl;
-        return;
+void Party::buy(Armor* armor) {
+    if (pay(armor->getPrice())) {
+        ownedArmors.push_back(armor);
     }
+}
+void Party::buy(Potion* potion) {
+    if (pay(potion->getPrice())) {
+        ownedPotions.push_back(potion);
+    }
+}
+void Party::buy(Spell* spell) {
+    if (pay(spell->getPrice())) {
+        ownedSpells.push_back(spell);
+    }
+}
+void Party::sell() {
     while (true) {
         std::string input;
         std::cout << "What to sell?" << std::endl;
@@ -1144,7 +862,7 @@ void Grid::sell() {
         }
     }
 }
-void Grid::battle() {
+void Party::battle() {
     std::cout << "Battle!" << std::endl;
     int averageHeroLevel = 0;
     for (int i = 0 ; i < heroNum ; ++i) {
@@ -1171,7 +889,7 @@ void Grid::battle() {
         while (true) {
             std::cin >> input;
             if (!input.compare("y")) {
-                displayHeroStats();
+                print();
                 for (int i = 0 ; i < monsterNum ; ++i) {
                     std::cout << i + 1 << (i == 0 ? "st" : (i == 1 ? "nd" : (i == 2 ? "rd" : "th"))) << " monster's stats: " << std::endl;
                     monsters[i]->print();
@@ -1315,4 +1033,331 @@ void Grid::battle() {
         delete monsters[i];
     }
     delete[] monsters;
+}
+void Party::checkInventory() const {
+    std::cout << "Weapons in inventory:" << std::endl;
+    for (std::vector<Weapon*>::const_iterator iter = ownedWeapons.begin() ; iter != ownedWeapons.end() ; ++iter) {
+        (*iter)->print();
+    }
+    std::cout << "Armors in inventory:" << std::endl;
+    for (std::vector<Armor*>::const_iterator iter = ownedArmors.begin() ; iter != ownedArmors.end() ; ++iter) {
+        (*iter)->print();
+    }
+    std::cout << "Potions in inventory:" << std::endl;
+    for (std::vector<Potion*>::const_iterator iter = ownedPotions.begin() ; iter != ownedPotions.end() ; ++iter) {
+        (*iter)->print();
+    }
+    std::cout << "Spells in inventory:" << std::endl;
+    for (std::vector<Spell*>::const_iterator iter = ownedSpells.begin() ; iter != ownedSpells.end() ; ++iter) {
+        (*iter)->print();
+    }
+}
+void Party::print() const {
+    for (int i = 0 ; i < heroNum ; ++i) {
+        std::cout << i + 1 << (i == 0 ? "st" : (i == 1 ? "nd" : "rd")) << " hero's stats: " << std::endl;
+        party[i]->print();
+    }
+}
+
+Market::Market(int weaponNumInit, int armorNumInit, int potionNumInit, int spellNumInit)
+:   weaponAmount(weaponNumInit), armorAmount(armorNumInit), potionAmount(potionNumInit), spellAmount(spellNumInit) {
+    int potionOffset = weaponAmount + armorAmount;
+    int spellOffset = potionOffset + potionAmount;
+    int itemAmount = spellOffset + spellAmount;
+    stock = new Item*[itemAmount];
+    for (int i = 0 ; i < weaponAmount ; ++i) {
+        stock[i] = new Weapon(weaponNames[i], i + 1, i/10);
+    }
+    for (int i = weaponAmount ; i < potionOffset ; ++i) {
+        stock[i] = new Armor(armorNames[i - 15], i - 14);
+    }
+    for (int i = potionOffset ; i < potionOffset + potionAmount/3 ; ++i) {
+        stock[i] = new StrengthPotion(potionNames[i - 30], i - 29);
+    }
+    for (int i = potionOffset + potionAmount/3 ; i < potionOffset + (2*potionAmount)/3 ; ++i) {
+        stock[i] = new DexterityPotion(potionNames[i - 30], i - 34);
+    }
+    for (int i = potionOffset + (2*potionNumInit)/3 ; i < spellOffset ; ++i) {
+        stock[i] = new AgilityPotion(potionNames[i - 30], i - 39);
+    }
+    for (int i = spellOffset ; i < spellOffset + spellAmount/3 ; ++i) {
+        stock[i] = new IceSpell(spellNames[i - 45], i - 44, 2*(i - 44), (i - 43)*5);
+    }
+    for (int i = spellOffset + spellAmount/3 ; i < spellOffset + (2*spellAmount)/3 ; ++i) {
+        stock[i] = new FireSpell(spellNames[i - 45], i - 49, 2*(i - 49), (i - 48)*5);
+    }
+    for (int i = spellOffset + (2*spellAmount)/3 ; i < spellOffset + spellAmount ; ++i) {
+        stock[i] = new LightingSpell(spellNames[i - 45], i - 54, 2*(i - 54), (i - 53)*5);
+    }
+}
+Market::~Market() {
+    for (int i = 0 ; i < weaponAmount + armorAmount + potionAmount + spellAmount ; ++i) {
+        delete stock[i];
+    }
+    delete[] stock;
+}
+void Market::buy(Party& party) {
+    while (true) {
+        std::string input;
+        int offset, amount;
+        int type;
+        std::cout << "What to buy?" << std::endl;
+        while (true) {
+            std::cin >> input;
+            if (!input.compare("weapon")) {
+                offset = 0;
+                amount = weaponAmount;
+                type = 0;
+                break;
+            }
+            else if (!input.compare("armor")) {
+                offset = weaponAmount;
+                amount = armorAmount;
+                type = 1;
+                break;
+            }
+            else if (!input.compare("potion")) {
+                offset = weaponAmount + armorAmount;
+                amount = potionAmount;
+                type = 2;
+                break;
+            }
+            else if (!input.compare("spell")) {
+                offset = weaponAmount + armorAmount + potionAmount;
+                amount = spellAmount;
+                type = 3;
+                break;
+            }
+            else {
+                std::cout << "Invalid input" << std::endl;
+            }
+        }
+        std::cout << "Choose one:" << std::endl;
+        for (int i = 0 ; i < amount ; ++i) {
+            std::cout << "\n(" << i + 1 << ")" << std::endl;
+            stock[i + offset]->print();
+        }
+        while (true) {
+            std::cin >> input;
+            if (!input.compare("back")) {
+                break;
+            }
+            else if ((atoi(input.c_str()) > 0) && (atoi(input.c_str()) <= amount)) {
+                if (type == 0) {
+                    party.buy((Weapon*) stock[atoi(input.c_str()) - 1 + offset]);
+                }
+                else if (type == 1) {
+                    party.buy((Armor*) stock[atoi(input.c_str()) - 1 + offset]);
+                }
+                else if (type == 2) {
+                    party.buy((Potion*) stock[atoi(input.c_str()) - 1 + offset]);
+                }
+                else if (type == 3) {
+                    party.buy((Spell*) stock[atoi(input.c_str()) - 1 + offset]);
+                }
+                break;
+            }
+            else {
+                std::cout << "Invalid input" << std::endl;
+            }
+        }
+        bool done;
+        std::cout << "Buy more? (y/n)" << std::endl;
+        while (true) {
+            std::cin >> input;
+            if (!input.compare("y")) {
+                done = false;
+                break;
+            }
+            else if (!input.compare("n")) {
+                done = true;
+                break;
+            }
+            else {
+                std::cout << "Invalid input" << std::endl;
+            }
+        }
+        if (done) {
+            break;
+        }
+    }
+}
+void Market::sell(Party& party) {
+    party.sell();
+}
+
+Grid::Grid(int initWidth, int initHeight, HeroType* heroTypes, int heroNumInit)
+:   width(initWidth), height(initHeight), party(heroTypes, heroNumInit), position{0,0}, gameMarket(15, 15, 15, 15) {
+    grid = new Square*[width];
+    for (int i = 0 ; i < width ; ++i) {
+        grid[i] = new Square[height];
+    }
+    srand(time(NULL));
+    for (int i = 0 ; i < width ; ++i) {
+        for (int j = 0 ; j < height ; ++j) {
+            if (!(rand() % 5)) {
+                grid[i][j] = nonAccesible;
+            }
+            else if (!(rand() % 3)) {
+                grid[i][j] = market;
+            }
+            else {
+                grid[i][j] = common;
+            }
+        }
+    }
+    grid[0][0] = common;
+}
+Grid::~Grid() {
+    for (int i = 0 ; i < width ; ++i) {
+        delete[] grid[i];
+    }
+    delete[] grid;
+}
+void Grid::playGame() {
+    while (true) {
+        std::string input;
+        std::cin >> input;
+        if (!input.compare("quitGame")) {
+            break;
+        }
+        else if (!input.compare("move")) {
+            while (true) {
+                std::cin >> input;
+                if (!input.compare("up")) {
+                    move(upDir);
+                    break;
+                }
+                else if (!input.compare("down")) {
+                    move(downDir);
+                    break;
+                }
+                else if (!input.compare("left")) {
+                    move(leftDir);
+                    break;
+                }
+                else if (!input.compare("right")) {
+                    move(rightDir);
+                    break;
+                }
+                else {
+                    std::cout << "Not a valid direction" << std::endl;
+                }
+            }
+        }
+        else if (!input.compare("displayHeroStats")) {
+            party.print();
+        }
+        else if (!input.compare("checkInventory")) {
+            party.checkInventory();
+        }
+        else if (!input.compare("equip")) {
+            party.equip();
+        }
+        else if (!input.compare("use")) {
+            party.use();
+        }
+        else if (!input.compare("displayMap")) {
+            displayMap();
+        }
+        else if (!input.compare("buy")) {
+            if (grid[position[0]][position[1]] != market) {
+                std::cout << "Can't buy outiside of the market" << std::endl;
+                continue;
+            }
+            gameMarket.buy(party);
+        }
+        else if (!input.compare("sell")) {
+            if (grid[position[0]][position[1]] != market) {
+                std::cout << "Can't sell outiside of the market" << std::endl;
+                continue;
+            }
+            gameMarket.sell(party);
+        }
+        /*
+        else if (!input.compare("up")) {
+            for (int i = 0 ; i < heroNum ; ++i) {
+                party[i]->addExperience(210);
+            }
+        }
+        */
+        /*
+        else if (!input.compare("battle")) {
+            battle();
+        }
+        */
+        else {
+            std::cout << "Unknown command" << std::endl;
+        }
+    }
+}
+void Grid::move(Direction direction) {
+    if (direction == upDir) {
+        if (position[1] + 1 >= height) {
+            std::cout << "Can't move out of bounds" << std::endl;
+            return;
+        }
+        if (grid[position[0]][position[1] + 1] == nonAccesible) {
+            std::cout << "Can't move into non-accessible square" << std::endl;
+            return;
+        }
+        ++position[1];
+    }
+    else if (direction == downDir) {
+        if (position[1] - 1 < 0) {
+            std::cout << "Can't move out of bounds" << std::endl;
+            return;
+        }
+        if (grid[position[0]][position[1] - 1] == nonAccesible) {
+            std::cout << "Can't move into non-accessible square" << std::endl;
+            return;
+        }
+        --position[1];
+    }
+    else if (direction == leftDir) {
+        if (position[0] - 1 < 0) {
+            std::cout << "Can't move out of bounds" << std::endl;
+            return;
+        }
+        if (grid[position[0] - 1][position[1]] == nonAccesible) {
+            std::cout << "Can't move into non-accessible square" << std::endl;
+            return;
+        }
+        --position[0];
+    }
+    else if (direction == rightDir) {
+        if (position[0] + 1 >= width) {
+            std::cout << "Can't move out of bounds" << std::endl;
+            return;
+        }
+        if (grid[position[0] + 1][position[1]] == nonAccesible) {
+            std::cout << "Can't move into non-accessible square" << std::endl;
+            return;
+        }
+        ++position[0];
+    }
+    std::cout << "pos: " << position[0] << " " << position[1] << std::endl;
+    if ((grid[position[0]][position[1]] == common) && !(rand() % 4)) {
+        party.battle();
+    }
+}
+void Grid::displayMap() const {
+    for (int i = 0 ; i < width ; ++i) {
+        for (int j = 0 ; j < height ; ++j) {
+            std::cout << "Square " << i << ", " << j << ":" << '\n';
+            if (grid[i][j] == nonAccesible) {
+                std::cout << "Non-accessible" << '\n';
+            }
+            else if (grid[i][j] == market) {
+                std::cout << "Market" << '\n';
+            }
+            else {
+                std::cout << "Common" << '\n';
+            }
+            if ((i == position[0]) && (j == position[1])) {
+                std::cout << "The party is here" << '\n';
+            }
+            std::cout << std::endl;
+        }
+    }
 }

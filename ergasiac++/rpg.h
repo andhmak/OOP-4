@@ -285,9 +285,45 @@ class Spirit : public Monster {
         void print() const;
 };
 
-enum Square { nonAccesible, market, common };
-
 enum HeroType { warrior, sorcerer, paladin };
+
+class Party {
+    Hero** party;
+    int heroNum;
+    std::vector<Weapon*> ownedWeapons;
+    std::vector<Armor*> ownedArmors;
+    std::vector<Potion*> ownedPotions;
+    std::vector<Spell*> ownedSpells;
+    public:
+        Party(HeroType* heroTypes, int heroNumInit);
+        ~Party();
+        bool equip(Hero* hero = NULL);
+        bool use(Hero* hero = NULL);
+        bool pay(int amount);
+        void buy(Weapon* weapon);
+        void buy(Armor* armor);
+        void buy(Potion* potion);
+        void buy(Spell* spell);
+        void sell();
+        void battle();
+        void checkInventory() const;
+        void print() const;
+};
+
+class Market {
+    Item** stock;
+    int weaponAmount;
+    int armorAmount;
+    int potionAmount;
+    int spellAmount;
+    public:
+        Market(int weaponNumInit, int armorNumInit, int potionNumInit, int spellNumInit);
+        ~Market();
+        void buy(Party& party);
+        void sell(Party& party);
+};
+
+enum Square { nonAccesible, market, common };
 
 enum Direction { upDir, downDir, leftDir, rightDir };
 
@@ -295,25 +331,13 @@ class Grid {
     Square** grid;
     int width;
     int height;
-    Hero** party;
-    int heroNum;
+    Party party;
     int position[2];
-    Item* marketItems[60];
-    std::vector<Weapon*> ownedWeapons;
-    std::vector<Armor*> ownedArmors;
-    std::vector<Potion*> ownedPotions;
-    std::vector<Spell*> ownedSpells;
+    Market gameMarket;
     public:
         Grid(int initWidth, int initHeight, HeroType* heroTypes, int heroNumInit);
         ~Grid();
         void playGame();
         void move(Direction direction);
         void displayMap() const;
-        void displayHeroStats() const;
-        void checkInventory() const;
-        bool equip(Hero* hero = NULL);
-        bool use(Hero* hero = NULL);
-        void buy();
-        void sell();
-        void battle();
 };
