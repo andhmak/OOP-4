@@ -189,7 +189,7 @@ void Living::gainDamage(int damage) {
     }
 }
 
-// Εκτυπώνει τις πληροφορίες του όντος
+// Εκτυπώνει τα δεδομένα του όντος
 void Living::print() const {
     std::cout << "Name:       " << name << '\n';
     std::cout << "Level:      " << level << '\n';
@@ -298,7 +298,7 @@ void Hero::endTurn() {
     }
 }
 
-// Καλεί τον εκτυπωτή της υπερκλάσης (Living) και εκτυπώνει τα στοιχεία του ήρωα
+// Καλεί τον εκτυπωτή της υπερκλάσης (Living) και εκτυπώνει τα δεδομένα του ήρωα
 void Hero::print() const {
     Living::print();
     std::cout << "MP:         " << magicPower << '\n';
@@ -370,21 +370,9 @@ void Paladin::print() const {
     Hero::print();
 }
 
-//Ενα  τέρας  (Monster)  είναι  ένα  ζωντανό  ον.
-//Εχει  ένα  εύρος  ζημιάς  που  μπορεί  να  προκαλέσει σε κάθε επίθεση του, ένα ποσό άμυνας το οποίο αφαιρείται από τη ζημιά που δέχεται σε μια επίθεση
-//του αντιπάλου του, και μια πιθανότητα να αποφύγει κάποια επίθεση του αντιπάλου του.
+// Συναρτήσεις της Monster
 
-StatusEffect::StatusEffect(int initEffect, int initTurns) : effect(initEffect), turns(initTurns) { }
-bool StatusEffect::passTurn() {
-    --turns;
-    if (turns == 0) {
-        return true;
-    }
-    return false;
-}
-
-Monster::Monster(const char* initName, int initLevel, int initMinDamage, int initMaxDamage, int initDefense, int initAgility)
-:   Living(initName, initLevel), minDamage(initMinDamage), maxDamage(initMaxDamage), defense(initDefense), agility(initAgility) { }
+// Destructor
 Monster::~Monster() {
     for (std::list<StatusEffect*>::iterator it = damageStatusEffects.begin() ; it != damageStatusEffects.end() ; ++it) {
         delete *it;
@@ -396,10 +384,8 @@ Monster::~Monster() {
         delete *it;
     }
 }
-void Monster::attack(Living& creature) const {
-    int range = maxDamage - minDamage;
-    creature.gainDamage(minDamage + (rand() % (range + 1)));
-}
+
+// Λαμβάνει υπόψιν την άμυνα και την ευκινησία, και καλεί την gainDamage της Living περνόντας την τροποποιημένη damage
 void Monster::gainDamage(int damage) {
     if ((rand() % (50 + agility)) < 50) {
         Living::gainDamage(damage - defense);
@@ -408,19 +394,27 @@ void Monster::gainDamage(int damage) {
         std::cout << "Attack evaded!" << std::endl;
     }
 }
+
+// Προσθέτει στο τέρας ένα status effect ζημίας ποσού amount και διάρκειας turns
 void Monster::gainDamageStatusEffect(int amount, int turns) {
     minDamage += amount;
     maxDamage += amount;
     damageStatusEffects.push_back(new StatusEffect(amount, turns));
 }
+
+// Προσθέτει στο τέρας ένα status effect άμυνας ποσού amount και διάρκειας turns
 void Monster::gainDefenseStatusEffect(int amount, int turns) {
     defense += amount;
     defenseStatusEffects.push_back(new StatusEffect(amount, turns));
 }
+
+// Προσθέτει στο τέρας ένα status effect ευκινησίας ποσού amount και διάρκειας turns
 void Monster::gainAgilityStatusEffect(int amount, int turns) {
     agility += amount;
     agilityStatusEffects.push_back(new StatusEffect(amount, turns));
 }
+
+// Αν HP != 0, ανακτά (recover) 1 HP και περνάει ένας γύρος για κάθε status effect.
 void Monster::endTurn() {
     if (getHealthPower() != 0) {
         recoverHealthPower(1);
@@ -448,6 +442,8 @@ void Monster::endTurn() {
         }
     }
 }
+
+// Καλεί τον εκτυπωτή της υπερκλάσης (Living) και εκτυπώνει τα δεδομένα του τέρατος
 void Monster::print() const {
     Living::print();
     std::cout << "Min Damage: " << minDamage << '\n';
@@ -456,33 +452,33 @@ void Monster::print() const {
     std::cout << "Agility:    " << agility << std::endl;
 }
 
-//Ενας δράκος(Dragon) είναι ένα τέρας που είναι ευνοημένο στο εύρος ζημιάς που μπορεί να προκαλέσει.
+// Συναρτήσεις της Dragon
 
-Dragon::Dragon(const char* initName, int initLevel)
-:   Monster(initName, initLevel, 3*initLevel, 6*initLevel, 2*initLevel, 2*initLevel) { }
+// Εκτυπώνει τον τύπο του τέρατος και καλεί τον εκτυπωτή της υπερκλάσης (Monster)
 void Dragon::print() const {
     std::cout << "Type:       Dragon" << std::endl;
     Monster::print();
 }
 
-//Ενα ον με  εξωσκελετό  (Exoskeleton)  είναι  ένα  τέρας  που  είναι  ευνοημένο  στο  ποσό  άμυνας  που  διαθέτει.
+// Συναρτήσεις της Exoskeleton
 
-Exoskeleton::Exoskeleton(const char* initName, int initLevel)
-:   Monster(initName, initLevel, 1*initLevel, 2*initLevel, 6*initLevel - 2, 2*initLevel) { }
+// Εκτυπώνει τον τύπο του τέρατος και καλεί τον εκτυπωτή της υπερκλάσης (Monster)
 void Exoskeleton::print() const {
     std::cout << "Type:       Exoskeleton" << std::endl;
     Monster::print();
 }
 
-//Ενα  πνεύμα  (Spirit)  είναι  ένα  τέρας  που  είναι  ευνοημένο  στο  πόσο  συχνά  αποφεύγει  επιθέσεις  του αντιπάλου του.
+// Συναρτήσεις της Spirit
 
-Spirit::Spirit(const char* initName, int initLevel)
-:   Monster(initName, initLevel, 1*initLevel, 2*initLevel, 2*initLevel, 6*initLevel) { }
+// Εκτυπώνει τον τύπο του τέρατος και καλεί τον εκτυπωτή της υπερκλάσης (Monster)
 void Spirit::print() const {
     std::cout << "Type:       Spirit" << std::endl;
     Monster::print();
 }
 
+// Συναρτήσεις της Party
+
+// Constructor
 Party::Party(HeroType* heroTypes, int heroNumInit) : heroNum(heroNumInit), heroes(new Hero*[heroNumInit]) {
     for (int i = 0 ; i < heroNum ; ++i) {
         if (heroTypes[i] == warrior) {
@@ -496,12 +492,19 @@ Party::Party(HeroType* heroTypes, int heroNumInit) : heroNum(heroNumInit), heroe
         }
     }
 }
+
+// Destructor
 Party::~Party() {
     for (int i = 0 ; i < heroNum ; ++i) {
         delete heroes[i];
     }
     delete[] heroes;
 }
+
+// Ανοίγει μενού όπου ο χρήστης μπορεί να επιλέξει όπλο ή πανοπλία που έχει διαθέσιμη η ομάδα και να το κάνει equip ο hero.
+// Αυτό αφαιρείται από το σύνολο των διαθέσιμων αντικειμένων και προστίθεται σε αυτό ό,τι "πάνω του" πριν ο hero/
+// Αν hero == NULL τότε ο χρήστης διαλέγει έναν ήρωα από την ομάδα.
+// Επιστρέφει true αν έγινε επιτυχώς η αλλαγή, αλλιώς false.
 bool Party::equip(Hero* hero) {
     std::cout << "What to equip?" << std::endl;
     while (true) {
@@ -617,6 +620,10 @@ bool Party::equip(Hero* hero) {
         }
     }
 }
+
+// Ανοίγει μενού όπου ο χρήστης μπορεί να επιλέξει ένα φίλτρο που έχει διαθέσιμη η ομάδα και να το κάνει use ο hero.
+// Αυτό αφαιρείται από το σύνολο των διαθέσιμων φίλτρων. Αν hero == NULL τότε ο χρήστης διαλέγει έναν ήρωα από την ομάδα.
+// Επιστρέφει true αν έγινε επιτυχώς η χρήση, αλλιώς false.
 bool Party::use(Hero* hero) {
     if (ownedPotions.size() == 0) {
         std::cout << "No potions owned" << std::endl;
@@ -665,6 +672,189 @@ bool Party::use(Hero* hero) {
         return false;
     }
 }
+
+// Αρχίζει μια μάχη σε γύρους μεταξύ της ομάδας και κάποιων τεράτων. Η διεξάγεται μέσω μενού όπου ο χρήστης μπορεί να
+// επιλέξει τις κινήσεις των ηρώων της ομάδας. Μπορεί να κάνει κανονική επίθεση (attack), να κάνει επίθεση με κάποιο
+// ξόρκι (castSpell) να χρησιμοποιήσει κάποιο φίλτρο (use) ή να αλλάξει όπλο ή πανοπλία (equip). Τα τέρατα επιτίθενται στον πρώτο
+// σε σειρά "ζωντανό" ήρωα. Στο τέλος κάθε γύρου καλούνται οι συναρτήσεις endTurn για τους ήρωες και τα τέρατα.
+// Η μάχη τελειώνει όταν φτάσει η ζωτική ενέργεια όλων των τεράτων ή όλων των ηρώων στο μηδέν. Αν η μάχη τελειώσει επειδή νίκησαν οι
+// ήρωες, τότε αυτοί λαμβάνουν κάποια χρήματα και εμπειρία βάσει του επιπέδου τους και του πλήθους των τεράτων που αντιμετώπισαν.
+// Αλλιώς, οι ήρωες χάνουν τα μισά χρήματα τους. Αν στο τέλος κάποιος ήρωας έχει απομείνει με μηδέν HP, τότε αυτή επαναφέρεται στο μισό της maxHP.
+void Party::battle() {
+    std::cout << "Battle!" << std::endl;
+    int averageHeroLevel = 0;
+    for (int i = 0 ; i < heroNum ; ++i) {
+        averageHeroLevel += heroes[i]->getLevel();
+    }
+    averageHeroLevel /= heroNum;
+    int monsterNum = heroNum + (rand() % 2);
+    Monster** monsters = new Monster*[monsterNum];
+    for (int i = 0 ; i < monsterNum ; ++i) {
+        if (!(rand() % 3)) {
+            monsters[i] = new Dragon(names[rand() % 98], averageHeroLevel);
+        }
+        else if (!(rand() % 2)) {
+            monsters[i] = new Exoskeleton(names[rand() % 98], averageHeroLevel);
+        }
+        else {
+            monsters[i] = new Spirit(names[rand() % 98], averageHeroLevel);
+        }
+    }
+    bool won, lost;
+    while (true) {
+        std::string input;
+        std::cout << "Display stats? (y/n)" << std::endl;
+        while (true) {
+            std::cin >> input;
+            if (!input.compare("y")) {
+                displayHeroStats();
+                for (int i = 0 ; i < monsterNum ; ++i) {
+                    std::cout << i + 1 << (i == 0 ? "st" : (i == 1 ? "nd" : (i == 2 ? "rd" : "th"))) << " monster's stats: " << std::endl;
+                    monsters[i]->print();
+                }
+                break;
+            }
+            else if (!input.compare("n")) {
+                break;
+            }
+            else {
+                std::cout << "Invalid input" << std::endl;
+            }
+        }
+        won = true, lost = true;
+        for (int i = 0 ; i < heroNum ; ++i) {
+            if (heroes[i]->getHealthPower() != 0) {
+                lost = false;
+                while (true) {
+                    std::cout << "What should " << heroes[i]->getName() << " do?" << std::endl;
+                    std::cin >> input;
+                    if (!input.compare("attack")) {
+                        int numInput;
+                        std::cout << "Which monster to attack?" << std::endl;
+                        for (int j = 0 ; j < monsterNum ; ++j) {
+                            std::cout << "(" << j + 1 << ") " << monsters[j]->getName() << ", HP: " << monsters[j]->getHealthPower() <<  std::endl;
+                        }
+                        while (true) {
+                            std::cin.clear();
+                            std::cin.ignore(1000, '\n');
+                            std::cin >> numInput;
+                            if ((numInput > 0) && (numInput <= monsterNum)) {
+                                break;
+                            }
+                            else {
+                                std::cout << "Invalid input" << std::endl;
+                            }
+                        }
+                        heroes[i]->attack(*monsters[numInput - 1]);
+                        break;
+                    }
+                    else if (!input.compare("castSpell")) {
+                        if (ownedSpells.size() == 0) {
+                            std::cout << "No spells owned" << std::endl;
+                            continue;
+                        }
+                        std::cout << "Which spell to cast?" << std::endl;
+                        int j = 0;
+                        for (std::vector<Spell*>::iterator iter = ownedSpells.begin() ; iter != ownedSpells.end() ; ++iter, ++j) {
+                            std::cout << "\n(" << j + 1 << ")" << std::endl;
+                            (*iter)->print();
+                        }
+                        int spellPos;
+                        while (true) {
+                            std::string input;
+                            std::cin >> input;
+                            if ((atoi(input.c_str()) > 0) && (atoi(input.c_str()) <= ownedSpells.size())) {
+                                spellPos = atoi(input.c_str()) - 1;
+                                break;
+                            }
+                            else {
+                                std::cout << "Invalid input" << std::endl;
+                            }
+                        }
+                        Spell* toCast = ownedSpells[spellPos];
+                        int numInput;
+                        std::cout << "Which monster to cast the spell on?" << std::endl;
+                        for (int j = 0 ; j < monsterNum ; ++j) {
+                            std::cout << "(" << j + 1 << ") " << monsters[j]->getName() << ", HP: " << monsters[j]->getHealthPower() <<  std::endl;
+                        }
+                        while (true) {
+                            std::cin.clear();
+                            std::cin.ignore(1000, '\n');
+                            std::cin >> numInput;
+                            if ((numInput > 0) && (numInput <= monsterNum)) {
+                                break;
+                            }
+                            else {
+                                std::cout << "Invalid input" << std::endl;
+                            }
+                        }
+                        if (heroes[i]->castSpell(*toCast, *monsters[numInput - 1])) {
+                            break;
+                        }
+                    }
+                    else if (!input.compare("use")) {
+                        if (use(heroes[i])) {
+                            break;
+                        }
+                    }
+                    else if (!input.compare("equip")) {
+                        if (equip(heroes[i])) {
+                            break;
+                        }
+                    }
+                    else {
+                        std::cout << "Unknown command" << std::endl;
+                    }
+                }
+            }
+        }
+        for (int i = 0 ; i < monsterNum ; ++i) {
+            if (monsters[i]->getHealthPower() != 0) {
+                won = false;
+                for (int j = 0 ; j < heroNum; ++j) {
+                    if (heroes[j]->getHealthPower() != 0) {
+                        std::cout << monsters[i]->getName() << " attacks " << heroes[j]->getName() << "!" << std::endl;
+                        monsters[i]->attack(*heroes[j]);
+                        break;
+                    }
+                }
+            }
+        }
+        if (won || lost) {
+            break;
+        }
+        for (int i = 0 ; i < heroNum ; ++i) {
+            heroes[i]->endTurn();
+        }
+        for (int i = 0 ; i < monsterNum ; ++i) {
+            monsters[i]->endTurn();
+        }
+    }
+    if (won) {
+        std::cout << "The party has won!" << std::endl;
+        for (int i = 0 ; i < heroNum ; ++i) {
+            heroes[i]->setMoney(heroes[i]->getMoney() + heroes[i]->getLevel()*10 + monsterNum*20);
+            heroes[i]->gainExperience(heroes[i]->getLevel()*5 + monsterNum*20);
+        }
+    }
+    else {
+        std::cout << "The party has lost!" << std::endl;
+        for (int i = 0 ; i < heroNum ; ++i) {
+            heroes[i]->setMoney(heroes[i]->getMoney() / 2);
+        }
+    }
+    for (int i = 0 ; i < heroNum ; ++i) {
+        if (heroes[i]->getHealthPower() == 0) {
+            heroes[i]->recoverHealthPower(heroes[i]->getMaxHealthPower() / 2);
+        }
+    }
+    for (int i = 0 ; i < monsterNum ; ++i) {
+        delete monsters[i];
+    }
+    delete[] monsters;
+}
+
+// Αν οι ήρωες έχουν συνολικά amount χρήματα, αφαιρούνται από αυτούς, και επιστρέφεται true, αλλιώς false.
 bool Party::pay(int amount) {
     int totalMoney = 0;
     for (int i = 0 ; i < heroNum ; ++i) {
@@ -685,26 +875,37 @@ bool Party::pay(int amount) {
     }
     return true;
 }
+
+// Η ομάδα πληρώνει (pay) την τιμή του όπλου, και αν το κάνει επιτυχώς το όπλο προστίθεται στο σύνολο των διαθέσιμων όπλων.
 void Party::buy(Weapon* weapon) {
     if (pay(weapon->getPrice())) {
         ownedWeapons.push_back(weapon);
     }
 }
+
+// Η ομάδα πληρώνει (pay) την τιμή της πανοπλίας, και αν το κάνει επιτυχώς το όπλο προστίθεται στο σύνολο των διαθέσιμων πανοπλιών.
 void Party::buy(Armor* armor) {
     if (pay(armor->getPrice())) {
         ownedArmors.push_back(armor);
     }
 }
+
+// Η ομάδα πληρώνει (pay) την τιμή του φίλτρου, και αν το κάνει επιτυχώς το όπλο προστίθεται στο σύνολο των διαθέσιμων φίλτρων.
 void Party::buy(Potion* potion) {
     if (pay(potion->getPrice())) {
         ownedPotions.push_back(potion);
     }
 }
+
+// Η ομάδα πληρώνει (pay) την τιμή του ξορκιού, και αν το κάνει επιτυχώς το όπλο προστίθεται στο σύνολο των διαθέσιμων ξορκιών.
 void Party::buy(Spell* spell) {
     if (pay(spell->getPrice())) {
         ownedSpells.push_back(spell);
     }
 }
+
+// Ανοίγει μενού όπου ο χρήστης μπορεί να επιλέξει κάτι που έχει διαθέσιμο η ομάδα πουλήσει.
+// Η ομάδα λαμβάνει την μισή τιμή του αντικειμένου (ή ξορκιού) σε χρήματα, και αυτό αφαιρείται από τα διαθέσιμα.
 void Party::sell() {
     while (true) {
         std::string input;
@@ -852,179 +1053,8 @@ void Party::sell() {
         }
     }
 }
-void Party::battle() {
-    std::cout << "Battle!" << std::endl;
-    int averageHeroLevel = 0;
-    for (int i = 0 ; i < heroNum ; ++i) {
-        averageHeroLevel += heroes[i]->getLevel();
-    }
-    averageHeroLevel /= heroNum;
-    int monsterNum = heroNum + (rand() % 2);
-    Monster** monsters = new Monster*[monsterNum];
-    for (int i = 0 ; i < monsterNum ; ++i) {
-        if (!(rand() % 3)) {
-            monsters[i] = new Dragon(names[rand() % 98], averageHeroLevel);
-        }
-        else if (!(rand() % 2)) {
-            monsters[i] = new Exoskeleton(names[rand() % 98], averageHeroLevel);
-        }
-        else {
-            monsters[i] = new Spirit(names[rand() % 98], averageHeroLevel);
-        }
-    }
-    bool won, lost;
-    while (true) {
-        std::string input;
-        std::cout << "Display stats? (y/n)" << std::endl;
-        while (true) {
-            std::cin >> input;
-            if (!input.compare("y")) {
-                print();
-                for (int i = 0 ; i < monsterNum ; ++i) {
-                    std::cout << i + 1 << (i == 0 ? "st" : (i == 1 ? "nd" : (i == 2 ? "rd" : "th"))) << " monster's stats: " << std::endl;
-                    monsters[i]->print();
-                }
-                break;
-            }
-            else if (!input.compare("n")) {
-                break;
-            }
-            else {
-                std::cout << "Invalid input" << std::endl;
-            }
-        }
-        won = true, lost = true;
-        for (int i = 0 ; i < heroNum ; ++i) {
-            if (heroes[i]->getHealthPower() != 0) {
-                lost = false;
-                while (true) {
-                    std::cout << "What should " << heroes[i]->getName() << " do?" << std::endl;
-                    std::cin >> input;
-                    if (!input.compare("attack")) {
-                        int numInput;
-                        std::cout << "Which monster to attack?" << std::endl;
-                        for (int j = 0 ; j < monsterNum ; ++j) {
-                            std::cout << "(" << j + 1 << ") " << monsters[j]->getName() << ", HP: " << monsters[j]->getHealthPower() <<  std::endl;
-                        }
-                        while (true) {
-                            std::cin.clear();
-                            std::cin.ignore(1000, '\n');
-                            std::cin >> numInput;
-                            if ((numInput > 0) && (numInput <= monsterNum)) {
-                                break;
-                            }
-                            else {
-                                std::cout << "Invalid input" << std::endl;
-                            }
-                        }
-                        heroes[i]->attack(*monsters[numInput - 1]);
-                        break;
-                    }
-                    else if (!input.compare("castSpell")) {
-                        if (ownedSpells.size() == 0) {
-                            std::cout << "No spells owned" << std::endl;
-                            continue;
-                        }
-                        std::cout << "Which spell to cast?" << std::endl;
-                        int j = 0;
-                        for (std::vector<Spell*>::iterator iter = ownedSpells.begin() ; iter != ownedSpells.end() ; ++iter, ++j) {
-                            std::cout << "\n(" << j + 1 << ")" << std::endl;
-                            (*iter)->print();
-                        }
-                        int spellPos;
-                        while (true) {
-                            std::string input;
-                            std::cin >> input;
-                            if ((atoi(input.c_str()) > 0) && (atoi(input.c_str()) <= ownedSpells.size())) {
-                                spellPos = atoi(input.c_str()) - 1;
-                                break;
-                            }
-                            else {
-                                std::cout << "Invalid input" << std::endl;
-                            }
-                        }
-                        Spell* toCast = ownedSpells[spellPos];
-                        int numInput;
-                        std::cout << "Which monster to cast the spell on?" << std::endl;
-                        for (int j = 0 ; j < monsterNum ; ++j) {
-                            std::cout << "(" << j + 1 << ") " << monsters[j]->getName() << ", HP: " << monsters[j]->getHealthPower() <<  std::endl;
-                        }
-                        while (true) {
-                            std::cin.clear();
-                            std::cin.ignore(1000, '\n');
-                            std::cin >> numInput;
-                            if ((numInput > 0) && (numInput <= monsterNum)) {
-                                break;
-                            }
-                            else {
-                                std::cout << "Invalid input" << std::endl;
-                            }
-                        }
-                        if (heroes[i]->castSpell(*toCast, *monsters[numInput - 1])) {
-                            break;
-                        }
-                    }
-                    else if (!input.compare("use")) {
-                        if (use(heroes[i])) {
-                            break;
-                        }
-                    }
-                    else if (!input.compare("equip")) {
-                        if (equip(heroes[i])) {
-                            break;
-                        }
-                    }
-                    else {
-                        std::cout << "Unknown command" << std::endl;
-                    }
-                }
-            }
-        }
-        for (int i = 0 ; i < monsterNum ; ++i) {
-            if (monsters[i]->getHealthPower() != 0) {
-                won = false;
-                for (int j = 0 ; j < heroNum; ++j) {
-                    if (heroes[j]->getHealthPower() != 0) {
-                        std::cout << monsters[i]->getName() << " attacks " << heroes[j]->getName() << "!" << std::endl;
-                        monsters[i]->attack(*heroes[j]);
-                        break;
-                    }
-                }
-            }
-        }
-        if (won || lost) {
-            break;
-        }
-        for (int i = 0 ; i < heroNum ; ++i) {
-            heroes[i]->endTurn();
-        }
-        for (int i = 0 ; i < monsterNum ; ++i) {
-            monsters[i]->endTurn();
-        }
-    }
-    if (won) {
-        std::cout << "The party has won!" << std::endl;
-        for (int i = 0 ; i < heroNum ; ++i) {
-            heroes[i]->setMoney(heroes[i]->getMoney() + heroes[i]->getLevel()*10 + monsterNum*20);
-            heroes[i]->gainExperience(heroes[i]->getLevel()*5 + monsterNum*20);
-        }
-    }
-    else {
-        std::cout << "The party has lost!" << std::endl;
-        for (int i = 0 ; i < heroNum ; ++i) {
-            heroes[i]->setMoney(heroes[i]->getMoney() / 2);
-        }
-    }
-    for (int i = 0 ; i < heroNum ; ++i) {
-        if (heroes[i]->getHealthPower() == 0) {
-            heroes[i]->recoverHealthPower(heroes[i]->getMaxHealthPower() / 2);
-        }
-    }
-    for (int i = 0 ; i < monsterNum ; ++i) {
-        delete monsters[i];
-    }
-    delete[] monsters;
-}
+
+// Εκτυπώνει το σύνολο των αντικειμένων (συμπεριλαμβανομένων των ξορκιών) που έχει διαθέσιμα η ομάδα
 void Party::checkInventory() const {
     std::cout << "Weapons in inventory:" << std::endl;
     for (std::vector<Weapon*>::const_iterator iter = ownedWeapons.begin() ; iter != ownedWeapons.end() ; ++iter) {
@@ -1043,13 +1073,19 @@ void Party::checkInventory() const {
         (*iter)->print();
     }
 }
-void Party::print() const {
+
+// Εκτυπώνει τους ήρωες της ομάδας
+void Party::displayHeroStats() const {
     for (int i = 0 ; i < heroNum ; ++i) {
         std::cout << i + 1 << (i == 0 ? "st" : (i == 1 ? "nd" : "rd")) << " hero's stats: " << std::endl;
         heroes[i]->print();
     }
 }
 
+// Συναρτήσεις της Market
+
+// Constructor. Τα αντικείμενα φτιάχνονται κατά αύξουσα "δύναμη". Όσο περισσότερα τόσο πιο "δυνατό" το τελευταίο.
+// Τα φίλτρα χωρίζονται δια τρία σε δύναμης, επιδεξιότητας και ετκινησίας, και τα ξόρκια σε πάγου, φωτιάς και ηλεκτρισμού.
 Market::Market(int weaponNumInit, int armorNumInit, int potionNumInit, int spellNumInit)
 :   weaponAmount(weaponNumInit), armorAmount(armorNumInit), potionAmount(potionNumInit), spellAmount(spellNumInit) {
     int potionOffset = weaponAmount + armorAmount;
@@ -1087,12 +1123,16 @@ Market::Market(int weaponNumInit, int armorNumInit, int potionNumInit, int spell
                                     (i - (spellOffset + (2*spellAmount)/3) + 2)*5);
     }
 }
+
+// Destructor
 Market::~Market() {
     for (int i = 0 ; i < weaponAmount + armorAmount + potionAmount + spellAmount ; ++i) {
         delete stock[i];
     }
     delete[] stock;
 }
+
+// Ανοίγει μενού όπου ο χρήστης μπορεί να επιλέξει κάτι που έχει διαθέσιμο η αγορά για να το αγοράσει (buy) το party
 void Market::buy(Party& party) {
     while (true) {
         std::string input;
@@ -1179,10 +1219,11 @@ void Market::buy(Party& party) {
         }
     }
 }
-void Market::sell(Party& party) {
-    party.sell();
-}
 
+// Συναρτήσεις της Grid
+
+// Constructor. Ορίζει τυχαία το είδος των τετργώνων εκτός από το αρχικό, που είναι common.
+// Φτιάχνει μια ομάδα όπως ορίζουν τα ορίσματα και μια αγορά με 15 αντικείμενα κάθε είδους,
 Grid::Grid(int initWidth, int initHeight, HeroType* heroTypes, int heroNumInit)
 :   width(initWidth), height(initHeight), party(heroTypes, heroNumInit), position{0,0}, gameMarket(15, 15, 15, 15) {
     grid = new Square*[width];
@@ -1205,12 +1246,20 @@ Grid::Grid(int initWidth, int initHeight, HeroType* heroTypes, int heroNumInit)
     }
     grid[0][0] = common;
 }
+
+// Destructor
 Grid::~Grid() {
     for (int i = 0 ; i < width ; ++i) {
         delete[] grid[i];
     }
     delete[] grid;
 }
+
+// Αρχίζει το παιχνίδι, δίνοντας στον χρήστη την δυνατότητα μέσω εντολών να κινηθεί στο πλέγμα (move).
+// Μπορεί επίσης να δει τις πληροφορίες των ηρώων της ομάδας (displayHeroStats), να δει τα αντικείμενα και ξόρκια που διαθέτει
+// (checkInventory), να χρησιμοποιήσει όπλα (equip), πανοπλίες (equip) και φίλτρα (use) πάνω στους ήρωες της ομάδας.
+// Οταν βρίσκεται σε τετράγωνο αγοράς, μπορεί και να αγοράσει (buy) και να πουλήσει (sell) αντικείμενα και ξόρκια.
+// Μπορεί επίσης να σταματήσει το παιχνίδι (quitGame).
 void Grid::playGame() {
     while (true) {
         std::string input;
@@ -1243,7 +1292,7 @@ void Grid::playGame() {
             }
         }
         else if (!input.compare("displayHeroStats")) {
-            party.print();
+            party.displayHeroStats();
         }
         else if (!input.compare("checkInventory")) {
             party.checkInventory();
@@ -1288,6 +1337,9 @@ void Grid::playGame() {
         }
     }
 }
+
+// Κινεί την ομάδα προς την κατεύθυνση direction.
+// Αν πάει σε common τετράγωνο υπάρχει μια πιθανότητα να ξεκινήσει μάχη της ομάδας (battle) με τέρατα.
 void Grid::move(Direction direction) {
     if (direction == upDir) {
         if (position[1] + 1 >= height) {
@@ -1337,6 +1389,8 @@ void Grid::move(Direction direction) {
         party.battle();
     }
 }
+
+// Εκτυπώνει το πλέγμα, δηλαδή το είδος κάθε κουτιού και το πού βρίκεται η ομάδα.
 void Grid::displayMap() const {
     for (int i = 0 ; i < width ; ++i) {
         for (int j = 0 ; j < height ; ++j) {

@@ -153,7 +153,7 @@ class Living {
         void recoverHealthPower(int amount);    // Αυξάνει την HP κατά amount, χωρίς να ξεπερνά την maxHP
         // Αν damage > 0, μειώνει την HP κατά damage. Δεν πέφτει κάτω από το 0 και αν το φτάσει τυπώνει ένα μήνυμα που λέει πως το ον λιποθύμησε.
         virtual void gainDamage(int damage);
-        void print() const; // Εκτυπώνει τις πληροφορίες του όντος
+        void print() const; // Εκτυπώνει τα δεδομένα του όντος
 };
 
 //Ενας ήρωας (Hero) είναι έναζωντανό ον.
@@ -189,7 +189,7 @@ class Hero : public Living {
         virtual void levelUp(int times) { level += times; }     // +
         void gainExperience(int amount);    // Αυξάνει την εμπειρία κατά amount, και ανά 100 μονάδες την μηδενίζει και αυξάνει κατά ένα επίπεδο τον ήρωα
         void recoverMagicPower(int amount); // Αυξάνει την MP κατά amount, χωρίς να ξεπερνά την maxMP
-        void gainDamage(int damage);    // Λαμβάνει υπόψιν την πανοπλία και την ευκινησία, και καλεί την gainDamage της Living περνόντας την τροποποιημένη damage
+        void gainDamage(int damage);    // Λαμβάνει υπόψιν την πανοπλία και την ευκινησία, και καλεί την gainDamage της υπερκλάσης Living περνόντας την τροποποιημένη damage
         bool spendMoney (int amount);   // Αν money >= amount, αφαιρείται το amount, και επιστρέφεται true. Αλλιώς false.
         // Προκαλεί στο creature ζημία ανάλογα με την δύναμη και το όπλο
         void attack(Living& creature) const { creature.gainDamage(strength + (weapon != NULL ? weapon->getDamage()*weapon->isTwoHanded() : 0)); }
@@ -203,7 +203,7 @@ class Hero : public Living {
         Armor* equip(Armor* newArmor);
         // Αν HP != 0, ανακτά (recover) 1 HP και 1 MP.
         void endTurn();
-        // Καλεί τον εκτυπωτή της υπερκλάσης (Living) και εκτυπώνει τα στοιχεία του ήρωα
+        // Καλεί τον εκτυπωτή της υπερκλάσης (Living) και εκτυπώνει τα δεδομένα του ήρωα
         virtual void print() const;
 };
 
@@ -240,116 +240,179 @@ class Paladin : public Hero {
         void print() const;
 };
 
-//Ενα  τέρας  (Monster)  είναι  ένα  ζωντανό  ον.
-//Εχει  ένα  εύρος  ζημιάς  που  μπορεί  να  προκαλέσει σε κάθε επίθεση του, ένα ποσό άμυνας το οποίο αφαιρείται από τη ζημιά που δέχεται σε μια επίθεση
-//του αντιπάλου του, και μια πιθανότητα να αποφύγει κάποια επίθεση του αντιπάλου του.
-
+// Κλάση που αναπαριστά μια προσωρινή μεταβολή στα στατιστικά ενός τέρατος
 class StatusEffect {
-    int turns;
-    int effect;
+    int turns;  // υπολοιπόμενη διάρκεια ισχύος σε γύρους
+    int effect; // μέγεθος μεταβολής
     public:
-        StatusEffect(int initEffect, int initTurns);
-        bool passTurn();
-        int getEffect() const { return effect; }
+        // Constructor
+        StatusEffect(int initEffect, int initTurns) : effect(initEffect), turns(initTurns) { }
+        int getEffect() const { return effect; }    // Accessor
+        // "Περνάει" έναν γύρο/μειώνει τους υπολοιπόμενους γύρους κατά 1. Αν οι γύροι τελειώσουν επιστρέφει true, αλλιώς false.
+        bool passTurn() { return --turns == 0; }
 };
 
+// Κλάση που αναπαριστά ένα τέρας, που είναι ζωντανό ον
 class Monster : public Living {
-    int minDamage;
-    int maxDamage;
-    int defense;
-    int agility;
-    std::list<StatusEffect*> damageStatusEffects;
-    std::list<StatusEffect*> defenseStatusEffects;
-    std::list<StatusEffect*> agilityStatusEffects;
+    int minDamage;  // ελάχιστη ζημία
+    int maxDamage;  // μέγιστη ζημία
+    int defense;    // άμυνα
+    int agility;    // ευκινησία
+    std::list<StatusEffect*> damageStatusEffects;   // status effects ζημίας
+    std::list<StatusEffect*> defenseStatusEffects;  // status effects άμυνας
+    std::list<StatusEffect*> agilityStatusEffects;  // status effects ευκινησίας
     public:
-        Monster(const char* initName, int initLevel, int initMinDamage, int initMaxDamage, int initDefense, int initAgility);
+        // Constructor
+        Monster(const char* initName, int initLevel, int initMinDamage, int initMaxDamage, int initDefense, int initAgility)
+        :   Living(initName, initLevel), minDamage(initMinDamage), maxDamage(initMaxDamage), defense(initDefense), agility(initAgility) { }
+        // Destructor
         ~Monster();
-        void attack(Living& creature) const;
+        // Προκαλεί στο creature ζημία τυχαία εντός του εύρους ζημιάς του τέρατος
+        void attack(Living& creature) const { creature.gainDamage(minDamage + (rand() % (maxDamage - minDamage + 1))); }
+        // Λαμβάνει υπόψιν την άμυνα και την ευκινησία, και καλεί την gainDamage της υπερκλάσης Living περνόντας την τροποποιημένη damage
         void gainDamage(int damage);
+        // Προσθέτει στο τέρας ένα status effect ζημίας ποσού amount και διάρκειας turns
         void gainDamageStatusEffect(int amount, int turns);
+        // Προσθέτει στο τέρας ένα status effect άμυνας ποσού amount και διάρκειας turns
         void gainDefenseStatusEffect(int amount, int turns);
+        // Προσθέτει στο τέρας ένα status effect ευκινησίας ποσού amount και διάρκειας turns
         void gainAgilityStatusEffect(int amount, int turns);
+        // Αν HP != 0, ανακτά (recover) 1 HP και περνάει ένας γύρος για κάθε status effect.
         void endTurn();
+        // Καλεί τον εκτυπωτή της υπερκλάσης (Living) και εκτυπώνει τα δεδομένα του τέρατος
         virtual void print() const;
 };
 
-//Ενας δράκος(Dragon) είναι ένα τέρας που είναι ευνοημένο στο εύρος ζημιάς που μπορεί να προκαλέσει.
-
+// Κλάση που αναπαριστά έναν δράκο, τέρας ευνοημένο στο εύρος ζημιάς που μπορεί να προκαλέσει
 class Dragon : public Monster {
     public:
-        Dragon(const char* initName, int initLevel);
+        // Constructor. Αρχικοποιεί το τέρας ανάλογα με το επίπεδο, ευνοώντας το στο εύρος ζημιάς
+        Dragon(const char* initName, int initLevel)
+        :   Monster(initName, initLevel, 3*initLevel, 6*initLevel, 2*initLevel, 2*initLevel) { }
+        // Εκτυπώνει τον τύπο του τέρατος και καλεί τον εκτυπωτή της υπερκλάσης (Monster)
         void print() const;
 };
 
-//Ενα ον με  εξωσκελετό  (Exoskeleton)  είναι  ένα  τέρας  που  είναι  ευνοημένο  στο  ποσό  άμυνας  που  διαθέτει.
-
+// Κλάση που αναπαριστά ένα ον με εξωσκελετό, τέρας ευνοημένο στο ποσό  άμυνας  που  διαθέτει
 class Exoskeleton : public Monster {
     public:
-        Exoskeleton(const char* initName, int initLevel);
+        // Constructor. Αρχικοποιεί το τέρας ανάλογα με το επίπεδο, ευνοώντας το στην άμυνα
+        Exoskeleton(const char* initName, int initLevel)
+        :   Monster(initName, initLevel, 1*initLevel, 2*initLevel, 6*initLevel - 2, 2*initLevel) { }
+        // Εκτυπώνει τον τύπο του τέρατος και καλεί τον εκτυπωτή της υπερκλάσης (Monster)
         void print() const;
 };
 
-//Ενα  πνεύμα  (Spirit)  είναι  ένα  τέρας  που  είναι  ευνοημένο  στο  πόσο  συχνά  αποφεύγει  επιθέσεις  του αντιπάλου του.
-
+// Κλάση που αναπαριστά ένα ον με πνεύμα, τέρας ευνοημένο στο ποσό  συχνά  αποφεύγει  επιθέσεις  του αντιπάλου του/ευκινησία
 class Spirit : public Monster {
     public:
-        Spirit(const char* initName, int initLevel);
+        // Constructor. Αρχικοποιεί το τέρας ανάλογα με το επίπεδο, ευνοώντας το στην ευκινησία
+        Spirit(const char* initName, int initLevel)
+        :   Monster(initName, initLevel, 1*initLevel, 2*initLevel, 2*initLevel, 6*initLevel) { }
+        // Εκτυπώνει τον τύπο του τέρατος και καλεί τον εκτυπωτή της υπερκλάσης (Monster)
         void print() const;
 };
 
+// Είδη ηρώων (για ορίσματα στον constructor του Party)
 enum HeroType { warrior, sorcerer, paladin };
 
+// Κλάση που αναπαριστά μια ομάδα ηρώων
 class Party {
-    Hero** heroes;
-    int heroNum;
-    std::vector<Weapon*> ownedWeapons;
-    std::vector<Armor*> ownedArmors;
-    std::vector<Potion*> ownedPotions;
-    std::vector<Spell*> ownedSpells;
+    Hero** heroes;  // ήρωες
+    int heroNum;    // πλήθος ηρώων
+    std::vector<Weapon*> ownedWeapons;  // όπλα που έχουν διαθέσιμα
+    std::vector<Armor*> ownedArmors;    // πανοπλίες που έχουν διαθέσιμες
+    std::vector<Potion*> ownedPotions;  // φίλτρα που έχουν διαθέσιμα
+    std::vector<Spell*> ownedSpells;    // ξόρκια που έχουν διαθέσιμα
     public:
+        // Constructor
         Party(HeroType* heroTypes, int heroNumInit);
+        // Destructor
         ~Party();
+        // Ανοίγει μενού όπου ο χρήστης μπορεί να επιλέξει όπλο ή πανοπλία που έχει διαθέσιμη η ομάδα και να το κάνει equip ο hero.
+        // Αυτό αφαιρείται από το σύνολο των διαθέσιμων αντικειμένων και προστίθεται σε αυτό ό,τι "πάνω του" πριν ο hero/
+        // Αν hero == NULL τότε ο χρήστης διαλέγει έναν ήρωα από την ομάδα.
+        // Επιστρέφει true αν έγινε επιτυχώς η αλλαγή, αλλιώς false.
         bool equip(Hero* hero = NULL);
+        // Ανοίγει μενού όπου ο χρήστης μπορεί να επιλέξει ένα φίλτρο που έχει διαθέσιμη η ομάδα και να το κάνει use ο hero.
+        // Αυτό αφαιρείται από το σύνολο των διαθέσιμων φίλτρων. Αν hero == NULL τότε ο χρήστης διαλέγει έναν ήρωα από την ομάδα.
+        // Επιστρέφει true αν έγινε επιτυχώς η χρήση, αλλιώς false.
         bool use(Hero* hero = NULL);
-        bool pay(int amount);
-        void buy(Weapon* weapon);
-        void buy(Armor* armor);
-        void buy(Potion* potion);
-        void buy(Spell* spell);
-        void sell();
+        // Αρχίζει μια μάχη σε γύρους μεταξύ της ομάδας και κάποιων τεράτων. Η διεξάγεται μέσω μενού όπου ο χρήστης μπορεί να
+        // επιλέξει τις κινήσεις των ηρώων της ομάδας. Μπορεί να κάνει κανονική επίθεση (attack), να κάνει επίθεση με κάποιο
+        // ξόρκι (castSpell) να χρησιμοποιήσει κάποιο φίλτρο (use) ή να αλλάξει όπλο ή πανοπλία (equip). Τα τέρατα επιτίθενται στον πρώτο
+        // σε σειρά "ζωντανό" ήρωα. Στο τέλος κάθε γύρου καλούνται οι συναρτήσεις endTurn για τους ήρωες και τα τέρατα.
+        // Η μάχη τελειώνει όταν φτάσει η ζωτική ενέργεια όλων των τεράτων ή όλων των ηρώων στο μηδέν. Αν η μάχη τελειώσει επειδή νίκησαν οι
+        // ήρωες, τότε αυτοί λαμβάνουν κάποια χρήματα και εμπειρία βάσει του επιπέδου τους και του πλήθους των τεράτων που αντιμετώπισαν.
+        // Αλλιώς, οι ήρωες χάνουν τα μισά χρήματα τους. Αν στο τέλος κάποιος ήρωας έχει απομείνει με μηδέν HP, τότε αυτή επαναφέρεται στο μισό της maxHP.
         void battle();
+        // Αν οι ήρωες έχουν συνολικά amount χρήματα, αφαιρούνται από αυτούς, και επιστρέφεται true, αλλιώς false.
+        bool pay(int amount);
+        // Η ομάδα πληρώνει (pay) την τιμή του όπλου, και αν το κάνει επιτυχώς το όπλο προστίθεται στο σύνολο των διαθέσιμων όπλων.
+        void buy(Weapon* weapon);
+        // Η ομάδα πληρώνει (pay) την τιμή της πανοπλίας, και αν το κάνει επιτυχώς το όπλο προστίθεται στο σύνολο των διαθέσιμων πανοπλιών.
+        void buy(Armor* armor);
+        // Η ομάδα πληρώνει (pay) την τιμή του φίλτρου, και αν το κάνει επιτυχώς το όπλο προστίθεται στο σύνολο των διαθέσιμων φίλτρων.
+        void buy(Potion* potion);
+        // Η ομάδα πληρώνει (pay) την τιμή του ξορκιού, και αν το κάνει επιτυχώς το όπλο προστίθεται στο σύνολο των διαθέσιμων ξορκιών.
+        void buy(Spell* spell);
+        // Ανοίγει μενού όπου ο χρήστης μπορεί να επιλέξει κάτι που έχει διαθέσιμο η ομάδα πουλήσει.
+        // Η ομάδα λαμβάνει την μισή τιμή του αντικειμένου (ή ξορκιού) σε χρήματα, και αυτό αφαιρείται από τα διαθέσιμα.
+        void sell();
+        // Εκτυπώνει το σύνολο των αντικειμένων (συμπεριλαμβανομένων των ξορκιών) που έχει διαθέσιμα η ομάδα
         void checkInventory() const;
-        void print() const;
+        // Εκτυπώνει τους ήρωες της ομάδας
+        void displayHeroStats() const;
 };
 
+// Κλάση που αναπαριστά μια αγορά
 class Market {
-    Item** stock;
-    int weaponAmount;
-    int armorAmount;
-    int potionAmount;
-    int spellAmount;
+    Item** stock;       // αντικείμενα (και ξόρκια) που είανι προς πώληση
+    int weaponAmount;   // πλήθος όπλων
+    int armorAmount;    // πλήθος πανοπλιών
+    int potionAmount;   // πλήθος φίλτρων
+    int spellAmount;    // πλήθος ξορκιών
     public:
+        // Constructor. Τα αντικείμενα φτιάχνονται κατά αύξουσα "δύναμη". Όσο περισσότερα τόσο πιο "δυνατό" το τελευταίο.
+        // Τα φίλτρα χωρίζονται δια τρία σε δύναμης, επιδεξιότητας και ετκινησίας, και τα ξόρκια σε πάγου, φωτιάς και ηλεκτρισμού.
         Market(int weaponNumInit, int armorNumInit, int potionNumInit, int spellNumInit);
+        // Destructor
         ~Market();
+        // Ανοίγει μενού όπου ο χρήστης μπορεί να επιλέξει κάτι που έχει διαθέσιμο η αγορά για να το αγοράσει (buy) το party
         void buy(Party& party);
-        void sell(Party& party);
+        // Καλεί την sell του party (είναι εδώ γιατί ταιριάζει νοηματικά και σε μια διαφορερική υλοποίηση μπορεί να έκανε χρήση των δεδομένων της αγοράς)
+        void sell(Party& party) { party.sell(); }
 };
 
+// Τύποι τετραγώνων στο πλέγμα
 enum Square { nonAccesible, market, common };
 
+// Κατευθύνσεις κίνησης στο πλέγμα
 enum Direction { upDir, downDir, leftDir, rightDir };
 
+// Κλάση που αναπαριστά ένα πλέγμα παιχνιδιού
 class Grid {
-    Square** grid;
-    int width;
-    int height;
-    Party party;
-    int position[2];
-    Market gameMarket;
+    Square** grid;      // το πλέγμα των τετραγώνων
+    int width;          // το πλάτος του πλέγματος
+    int height;         // το ύωος του πλέγματος
+    Party party;        // η ομάδα των ηρώων που κινείται στο πλέγμα
+    int position[2];    // η θέση της ομάδας στο πλέγμα
+    Market gameMarket;  // η αγορά του πλέγματος/παιχνιδιού
     public:
+        // Constructor. Ορίζει τυχαία το είδος των τετργώνων εκτός από το αρχικό, που είναι common.
+        // Φτιάχνει μια ομάδα όπως ορίζουν τα ορίσματα και μια αγορά με 15 αντικείμενα κάθε είδους,
         Grid(int initWidth, int initHeight, HeroType* heroTypes, int heroNumInit);
+        // Destructor
         ~Grid();
+        // Αρχίζει το παιχνίδι, δίνοντας στον χρήστη την δυνατότητα μέσω εντολών να κινηθεί στο πλέγμα (move).
+        // Μπορεί επίσης να δει τις πληροφορίες των ηρώων της ομάδας (displayHeroStats), να δει τα αντικείμενα και ξόρκια που διαθέτει
+        // (checkInventory), να χρησιμοποιήσει όπλα (equip), πανοπλίες (equip) και φίλτρα (use) πάνω στους ήρωες της ομάδας.
+        // Οταν βρίσκεται σε τετράγωνο αγοράς, μπορεί και να αγοράσει (buy) και να πουλήσει (sell) αντικείμενα και ξόρκια.
+        // Μπορεί επίσης να σταματήσει το παιχνίδι (quitGame).
         void playGame();
+        // Κινεί την ομάδα προς την κατεύθυνση direction.
+        // Αν πάει σε common τετράγωνο υπάρχει μια πιθανότητα να ξεκινήσει μάχη της ομάδας (battle) με τέρατα.
         void move(Direction direction);
+        // Εκτυπώνει το πλέγμα, δηλαδή το είδος κάθε κουτιού και το πού βρίκεται η ομάδα.
         void displayMap() const;
 };
