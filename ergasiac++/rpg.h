@@ -12,20 +12,18 @@
 class Item {
     std::string name;   // όνομα του αντικειμένου 
     int price;          // τιμή αγοράς του
-    int minLevel;       // ελάχιστο επίπεδο στο οποίο πρέπει να βρίσκεται ο ήρωας για να το χρησιμοποιήσει
+    int minLevel;       // ελάχιστο επίπεδο στο οποίο πρέπει να βρίσκεται ένας ήρωας για να το χρησιμοποιήσει
     public:
-        Item(const char* initName, int initPrice, int initMinLevel);
-        int getPrice() const { return price; }
-        int getMinLevel() const { return minLevel; }
+        Item(const char* initName, int initPrice, int initMinLevel);    // Constructor
+        int getPrice() const { return price; }          // Accessors
+        int getMinLevel() const { return minLevel; }    //
         virtual void print() const;
 };
 
-//Ενα  όπλο  (Weapon)  είναι  ένααντικείμενο το οποίο μπορεί να χρησιμοποιηθεί από τον ήρωα για να επιτεθεί σε κάποιο τέρας. Εχει ένα συγκεκριμένο ποσό 
-//ζημιάς που προκαλεί στον αντίπαλο του και μπορεί να απαιτεί το ένα ή και ταδύο χέρια του ήρωα για να το χρησιμοποιεί.
-
+// Κλάση που αναπαριστά ένα όπλο, αντικείμενο το οποίο μπορεί να χρησιμοποιηθεί από έναν ήρωα για να επιτεθεί σε κάποιο τέρας
 class Weapon : public Item {
-    int damage;
-    bool twoHanded;
+    int damage;     // ποσό ζημιάς που προκαλεί στον αντίπαλο
+    bool twoHanded; // αν χρησιμοποιείται και με τα δύο χέρια
     public:
         Weapon(const char* initName, int initDamage, int initTwoHanded);
         int getDamage() const { return damage; }
@@ -204,8 +202,8 @@ class Hero : public Living {
 class Warrior : public Hero {
     public:
         Warrior(const char* initName);
-        void print() const;
         void levelUp(int times);
+        void print() const;
 };
 
 // Ενας  μάγος  (Sorcerer)  είναι  ένας  ήρωας  που  είναι  ευνοημένος στον τομέα της επιδεξιότητας και της ευκινησίας.
@@ -213,8 +211,8 @@ class Warrior : public Hero {
 class Sorcerer : public Hero {
     public:
         Sorcerer(const char* initName);
-        void print() const;
         void levelUp(int times);
+        void print() const;
 };
 
 //Ενας ιππότης (Paladin) είναι ένας ήρωας που είναιευνοημένος στον τομέα της δύναμης και της επιδεξιότητας.
@@ -222,8 +220,8 @@ class Sorcerer : public Hero {
 class Paladin : public Hero {
     public:
         Paladin(const char* initName);
-        void print() const;
         void levelUp(int times);
+        void print() const;
 };
 
 //Ενα  τέρας  (Monster)  είναι  ένα  ζωντανό  ον.
@@ -250,13 +248,13 @@ class Monster : public Living {
     public:
         Monster(const char* initName, int initLevel, int initMinDamage, int initMaxDamage, int initDefense, int initAgility);
         ~Monster();
-        virtual void print() const;
         void attack(Living& creature) const;
         void gainDamage(int damage);
         void gainDamageStatusEffect(int amount, int turns);
         void gainDefenseStatusEffect(int amount, int turns);
         void gainAgilityStatusEffect(int amount, int turns);
         void endTurn();
+        virtual void print() const;
 };
 
 //Ενας δράκος(Dragon) είναι ένα τέρας που είναι ευνοημένο στο εύρος ζημιάς που μπορεί να προκαλέσει.

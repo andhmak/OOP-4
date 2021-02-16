@@ -290,43 +290,43 @@ void Hero::print() const {
 //τα στατιστικάαυτά  θα  επηρεάζονται  περισσότερο. 
 
 Warrior::Warrior(const char* initName) : Hero(initName, 5, 2, 5) { }
-void Warrior::print() const {
-    std::cout << "Type:       Warrior" << std::endl;
-    Hero::print();
-}
 void Warrior::levelUp(int times) {
     Hero::levelUp(times);
     strength += 3*times;
     dexterity += times;
     agility += 3*times;
 }
+void Warrior::print() const {
+    std::cout << "Type:       Warrior" << std::endl;
+    Hero::print();
+}
 
 // Ενας  μάγος  (Sorcerer)  είναι  ένας  ήρωας  που  είναι  ευνοημένος στον τομέα της επιδεξιότητας και της ευκινησίας.
 
 Sorcerer::Sorcerer(const char* initName) : Hero(initName, 2, 5, 5) { }
-void Sorcerer::print() const {
-    std::cout << "Type:       Sorcerer" << std::endl;
-    Hero::print();
-}
 void Sorcerer::levelUp(int times) {
     Hero::levelUp(times);
     strength += times;
     dexterity += 3*times;
     agility += 3*times;
 }
+void Sorcerer::print() const {
+    std::cout << "Type:       Sorcerer" << std::endl;
+    Hero::print();
+}
 
 //Ενας ιππότης (Paladin) είναι ένας ήρωας που είναιευνοημένος στον τομέα της δύναμης και της επιδεξιότητας.
 
 Paladin::Paladin(const char* initName) : Hero(initName, 5, 5, 2) { }
-void Paladin::print() const {
-    std::cout << "Type:       Paladin" << std::endl;
-    Hero::print();
-}
 void Paladin::levelUp(int times) {
     Hero::levelUp(times);
     strength += 3*times;
     dexterity += 3*times;
     agility += times;
+}
+void Paladin::print() const {
+    std::cout << "Type:       Paladin" << std::endl;
+    Hero::print();
 }
 
 //Ενα  τέρας  (Monster)  είναι  ένα  ζωντανό  ον.
@@ -354,13 +354,6 @@ Monster::~Monster() {
     for (std::list<StatusEffect*>::iterator it = agilityStatusEffects.begin() ; it != agilityStatusEffects.end() ; ++it) {
         delete *it;
     }
-}
-void Monster::print() const {
-    Living::print();
-    std::cout << "Min Damage: " << minDamage << '\n';
-    std::cout << "Max Damage: " << maxDamage << '\n';
-    std::cout << "Defense:    " << defense << '\n';
-    std::cout << "Agility:    " << agility << std::endl;
 }
 void Monster::attack(Living& creature) const {
     int range = maxDamage - minDamage;
@@ -413,6 +406,13 @@ void Monster::endTurn() {
             it = agilityStatusEffects.erase(it);
         }
     }
+}
+void Monster::print() const {
+    Living::print();
+    std::cout << "Min Damage: " << minDamage << '\n';
+    std::cout << "Max Damage: " << maxDamage << '\n';
+    std::cout << "Defense:    " << defense << '\n';
+    std::cout << "Agility:    " << agility << std::endl;
 }
 
 //Ενας δράκος(Dragon) είναι ένα τέρας που είναι ευνοημένο στο εύρος ζημιάς που μπορεί να προκαλέσει.
