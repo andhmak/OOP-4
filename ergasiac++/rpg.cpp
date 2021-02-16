@@ -7,9 +7,9 @@
 #include "rpg.h"
 #include "names.h"
 
-// ́Ενα  αντικείμενο  (Item)  έχει  ένα  όνομα,
-//   μία  τιμή  αγοράς  και  έχει  και  κάποιο  ελάχιστο  επίπεδοστο  οποίο  πρέπει  να  βρίσκεται  ο  ήρωας  για  να  το  χρησιμοποιήσει.
+// Συναρτήσεις της Item
 
+// Constructor
 Item::Item(const char* initName, int initPrice, int initMinLevel) : name(initName), price(initPrice), minLevel(initMinLevel) { }
 void Item::print() const {
     std::cout << "Name:       " << name << '\n';
@@ -17,11 +17,14 @@ void Item::print() const {
     std::cout << "Min Level:  " << minLevel << std::endl;
 }
 
-//Ενα  όπλο  (Weapon)  είναι  ένααντικείμενο το οποίο μπορεί να χρησιμοποιηθεί από τον ήρωα για να επιτεθεί σε κάποιο τέρας. Εχει ένα συγκεκριμένο ποσό 
-//ζημιάς που προκαλεί στον αντίπαλο του και μπορεί να απαιτεί το ένα ή και ταδύο χέρια του ήρωα για να το χρησιμοποιεί.
+// Συναρτήσεις της Weapon
 
+// Constructor. Δίνονται όνομα, ζημία και το αν χρησιμοποιείται με τα δύο χέρια.
+// Τιμή και ελάχιστο επίπεδο υπολογίζονται συναρτήσει των τελευταίων δύο.
 Weapon::Weapon(const char* initName, int initDamage, int initTwoHanded)
 :   Item(initName, 10*initDamage*(initTwoHanded ? 2 : 1), initDamage/(initTwoHanded ? 1 : 3) + 1), damage(initDamage), twoHanded(initTwoHanded) { }
+
+// Εκτυπώνει τα δεδομένα του όπλου και καλεί τον εκτυπωτή της υπερκλάσης (Item)
 void Weapon::print() const {
     std::cout << "Weapon:" << '\n';
     Item::print();
@@ -29,82 +32,84 @@ void Weapon::print() const {
     std::cout << "Two-handed: " << (twoHanded ? "yes" : "no") << std::endl;
 }
 
-// price = 10*damage - 20*two_handed
+// Συναρτήσεις της Armor
 
-//Μία πανοπλία (Armor) είναι ένα αντικείμενο το οποίο όταντο φοράει ένας ήρωας, μειώνει την ζημία που δέχεται από μία επίθεση του αντιπάλου του. 
-
+// Constructor. Δίνονται όνομα και άμυνα. Τιμή και ελάχιστο επίπεδο υπολογίζονται συναρτήσει της άμυνας.
 Armor::Armor(const char* initName, int initDefense)
 :   Item(initName, 15*initDefense, initDefense/3 + 1), defense(initDefense) { }
+
+// Εκτυπώνει τα δεδομένα της πανοπλίας και καλεί τον εκτυπωτή της υπερκλάσης (Item)
 void Armor::print() const {
     std::cout << "Armor:" << '\n';
     Item::print();
     std::cout << "Defense:    " << defense << std::endl;
 }
 
-//price = 15*defense
+// Συναρτήσεις της Potion
 
-//Ενα φίλτρο(Potion) είναι ένα αντικείμενο το οποίο όταν το χρησιμοποιεί ένας ήρωας, αυξάνει κάποιο στατιστικό του
-//κατά  κάποιο  ποσό.  Τα  φίλτρα  είναι  μίας  χρήσης,  πράγμα  που  σημαίνει  ότι  μετά  τη  χρήση  τους,δεν μπορούν να ξαναχρησιμοποιηθούν.
-
+// Constructor. Δίνονται όνομα και δραστικότητα. Τιμή και ελάχιστο επίπεδο υπολογίζονται συναρτήσει της δραστικότητα.
 Potion::Potion(const char* initName, int initEffect)
 :   Item(initName, 30*initEffect, initEffect/2 + 1), effect(initEffect) { }
+
+// Εκτυπώνει τα δεδομένα του φίλτρου και καλεί τον εκτυπωτή της υπερκλάσης (Item)
 void Potion::print() const {
     std::cout << "Potion:" << '\n';
     Item::print();
 }
 
-//price = effect*30
+// Συναρτήσεις της StrengthPotion
 
-bool StrengthPotion::useOn(Hero* hero) {
-    if (hero->getLevel() < getMinLevel()) {
-        std::cout << "The hero's level is too low to use this potion" << std::endl;
-        return false;
-    }
+// Αυξάνεται η δύναμη του ήρωα hero κατά effect.
+void StrengthPotion::useOn(Hero* hero) {
     hero->addStrength(effect);
-    return true;
 }
 
+// Εκτυπώνει την δύναμη που προσίδει το φίλτρο και καλεί τον εκτυπωτή της υπερκλάσης (Potion)
 void StrengthPotion::print() const {
     Potion::print();
     std::cout << "Strength:   +" << effect << std::endl;
 }
 
-bool DexterityPotion::useOn(Hero* hero) {
-    if (hero->getLevel() < getMinLevel()) {
-        std::cout << "The hero's level is too low to use this potion" << std::endl;
-        return false;
-    }
+// Συναρτήσεις της DexterityPotion
+
+// Αυξάνεται η επιδεξιότητα του ήρωα hero κατά effect.
+void DexterityPotion::useOn(Hero* hero) {
     hero->addDexterity(effect);
-    return true;
 }
 
+// Εκτυπώνει την επιδεξιότητα που προσίδει το φίλτρο και καλεί τον εκτυπωτή της υπερκλάσης (Potion)
 void DexterityPotion::print() const {
     Potion::print();
     std::cout << "Dexterity:  +" << effect << std::endl;
 }
 
-bool AgilityPotion::useOn(Hero* hero) {
-    if (hero->getLevel() < getMinLevel()) {
-        std::cout << "The hero's level is too low to use this potion" << std::endl;
-        return false;
-    }
+// Συναρτήσεις της AgilityPotion
+
+// Αυξάνεται η ευκινησία του ήρωα hero κατά effect.
+void AgilityPotion::useOn(Hero* hero) {
     hero->addAgility(effect);
-    return true;
 }
 
+// Εκτυπώνει την ευκινησία που προσίδει το φίλτρο και καλεί τον εκτυπωτή της υπερκλάσης (Potion)
 void AgilityPotion::print() const {
     Potion::print();
     std::cout << "Agility:    +" << effect << std::endl;
 }
 
-//Ενα  ξόρκι  (Spell)  αντιπροσωπεύει  μια  μαγική  επίθεση  που  μπορεί  να  εκτελέσει  κάποιος  ήρωας. ́Ενα ξόρκι έχει όνομα, τιμή και κάποιο ελάχιστο
-//επίπεδο στο οποίο πρέπει να βρίσκεται ο ήρωας για να  το  χρησιμοποιήσει.    ́Ενα  ξόρκι  έχει  ένα  εύρος  ζημιάς  που  μπορεί  να  προκαλέσει  καθώς 
-//και  ένα ποσό μαγικής ενέργειας που απαιτεί για να εκτελεστεί. Μετά την εκτέλεση, το ποσό αυτό της μαγικής ενέργειας αφαιρείται από τον ήρωα.
-//Το επίπεδο της ζημιάς που προκαλεί ένα ξόρκι εξαρτάται από την τιμή της επιδεξιότητας του ήρωα και πάντα βρίσκεται στο εύρος που έχει καθοριστεί.
+// Συναρτήσεις της Spell
 
+// Constructor. Δίνονται όνομα, εύρος ζημίας και μαγικό κόστος. Τιμή και ελάχιστο επίπεδο υπολογίζονται συναρτήσει των προηγούμενων.
 Spell::Spell(const char* initName, int initMinDamage, int initMaxDamage, int initMagicCost)
 :   Item(initName, std::max(5*(initMinDamage + initMaxDamage) - initMagicCost/5, 1), std::max((initMinDamage + initMaxDamage) - initMagicCost/5, 1)),
 minDamage(initMinDamage), maxDamage(initMaxDamage), magicCost(initMagicCost) { }
+
+// Εκτελεί το ξόρκι στο τέρας enemy με αποδοτικότητα efficiency. Όσο μεγαλύτερη
+// η αποδοτικότητα τόσο μεγαλήτερη η ζημία, εντός του καθορισμένου εύρους.
+void Spell::cast(Monster& enemy, int efficiency) const {
+    enemy.gainDamage(minDamage + (maxDamage - minDamage)*((efficiency)/(efficiency + 5)));
+}
+
+// Εκτυπώνει τα δεδομένα του ξορκιού και καλεί τον εκτυπωτή της υπερκλάσης (Item)
 void Spell::print() const {
     Item::print();
     std::cout << "Min damage: " << minDamage << '\n';
@@ -112,60 +117,68 @@ void Spell::print() const {
     std::cout << "Magic cost: " << magicCost << std::endl;
 }
 
-//price = 10*(mindamage+maxdamage)/2
-//magiccost = 2*(mindamage+maxdamage)/2
+// Συναρτήσεις της IceSpell
 
-//Ενα ξόρκι πάγου(IceSpell) είναι ένα ξόρκι το οποίο, εκτός από τη ζημιά που προκαλεί, μειώνει και το εύρος ζημιάς του αντιπάλου για κάποιους γύρους.
-
-IceSpell::IceSpell(const char* initName, int initMinDamage, int initMaxDamage, int initMagicCost)
-:   Spell(initName, initMinDamage, initMaxDamage, initMagicCost) { }
+// Εκτελεί το ξόρκι στο τέρας enemy με αποδοτικότητα efficiency.
+// Εκτός από ζημία που προκαλεί δίνει και ένα αρνητικό status effect δύναμης στο enemy διάρκειας 3 γύρων.
 void IceSpell::cast(Monster& enemy, int efficiency) const {
     int damage = minDamage + (maxDamage - minDamage)*((efficiency)/(efficiency + 5));
+    enemy.gainDamage(damage);
     enemy.gainDamageStatusEffect(-1*damage, 3);
 }
+
+// Εκτυπώνει τον τύπο του ξορκιού και καλεί τον εκτυπωτή της υπερκλάσης (Spell)
 void IceSpell::print() const {
     std::cout << "Ice spell:" << std::endl;
     Spell::print();
 }
 
-//Ενα ξόρκι φωτιάς (FireSpell) είναι ένα ξόρκι το οποίο,  εκτός απότη ζημιά που προκαλεί, μειώνει και το ποσό άμυνας του αντιπάλου για κάποιους γύρους. 
+// Συναρτήσεις της FireSpell
 
-FireSpell::FireSpell(const char* initName, int initMinDamage, int initMaxDamage, int initMagicCost)
-:   Spell(initName, initMinDamage, initMaxDamage, initMagicCost) { }
+// Εκτελεί το ξόρκι στο τέρας enemy με αποδοτικότητα efficiency.
+// Εκτός από ζημία που προκαλεί δίνει και ένα αρνητικό status effect άμυνας στο enemy διάρκειας 3 γύρων.
 void FireSpell::cast(Monster& enemy, int efficiency) const {
-    int damage = std::max(minDamage, maxDamage*((efficiency)/(efficiency + 1)));
+    int damage = minDamage + (maxDamage - minDamage)*((efficiency)/(efficiency + 5));
+    enemy.gainDamage(damage);
     enemy.gainDefenseStatusEffect(-1*damage, 3);
 }
+
+// Εκτυπώνει τον τύπο του ξορκιού και καλεί τον εκτυπωτή της υπερκλάσης (Spell)
 void FireSpell::print() const {
     std::cout << "Fire spell:" << std::endl;
     Spell::print();
 }
 
-//Ενα ξόρκι ηλεκτρισμού (LightingSpell) είναι ένα ξόρκι το οποίο, εκτός από τη ζημιά που προκαλεί, μειώνει καιτην πιθανότητα να αποφύγει μια επίθεση ο
-//αντίπαλος για κάποιους γύρους.
+// Συναρτήσεις της LightingSpell
 
-LightingSpell::LightingSpell(const char* initName, int initMinDamage, int initMaxDamage, int initMagicCost)
-:   Spell(initName, initMinDamage, initMaxDamage, initMagicCost) { }
+// Εκτελεί το ξόρκι στο τέρας enemy με αποδοτικότητα efficiency.
+// Εκτός από ζημία που προκαλεί δίνει και ένα αρνητικό status effect ευκινησίας στο enemy διάρκειας 3 γύρων.
 void LightingSpell::cast(Monster& enemy, int efficiency) const {
-    int damage = std::max(minDamage, maxDamage*((efficiency)/(efficiency + 1)));
+    int damage = minDamage + (maxDamage - minDamage)*((efficiency)/(efficiency + 5));
+    enemy.gainDamage(damage);
     enemy.gainAgilityStatusEffect(-1*damage, 3);
 }
+
+// Εκτυπώνει τον τύπο του ξορκιού και καλεί τον εκτυπωτή της υπερκλάσης (Spell)
 void LightingSpell::print() const {
     std::cout << "Lighting spell:" << std::endl;
     Spell::print();
 }
 
-//Ενα ζωντανό ον (Living) αντιπροσωπεύει μια ζωντανή οντότητα του κόσμου του παιχνιδιού.
-//Εχει ένα  όνομα,  κάποιο  επίπεδο  (level)  καθώς  και  ένα  ποσό  ζωτικής  ενέργειας  (healthPower).
-//Οταν η ζωτική ενέργεια  του  φτάσει  στο  μηδέν,  το  ζωντανό  ον  λιποθυμάει.
+// Συναρτήσεις της Living
 
+// Constructor
 Living::Living(const char* initName, int initLevel) : name(initName), level(initLevel), healthPower(50), maxHealthPower(50) { }
+
+// Αυξάνει την healthPower κατά amount, χωρίς να ξεπερνά την maxHealthPower
 void Living::recoverHealthPower(int amount) {
     healthPower += amount;
     if (healthPower > maxHealthPower) {
         healthPower = maxHealthPower;
     }
 }
+
+// Αν damage > 0, μειώνει την healthPower κατά damage. Δεν πέφτει κάτω από το 0 και αν το φτάσει τυπώνει ένα μήνυμα που λέει πως το ον λιποθύμησε.
 void Living::gainDamage(int damage) {
     if (damage > 0) {
         healthPower -= damage;
@@ -175,6 +188,8 @@ void Living::gainDamage(int damage) {
         std::cout << name << " has fainted!" << std::endl;
     }
 }
+
+// Εκτυπώνει τις πληροφορίες του όντος
 void Living::print() const {
     std::cout << "Name:       " << name << '\n';
     std::cout << "Level:      " << level << '\n';
@@ -182,18 +197,14 @@ void Living::print() const {
     std::cout << "Max HP:     " << maxHealthPower << std::endl;
 }
 
-//Ενας ήρωας (Hero) είναι έναζωντανό ον.
-//Εχει ένα ποσό μαγικής ενέργειας (magicPower), καθώς και κάποια χαρακτηριστικάπου επηρεάζουν την ικανότητα του στη μάχη.
-//Ενας ήρωας έχει κάποια τιμή δύναμης (strength), κάποια τιμή επιδεξιότητας (dexterity) καθώς και κάποια τιμή ευκινησίας (agility).
-//Η δύναμη του ήρωα προστίθεται στο ποσό ζημιάς που προκαλεί ένα όπλο, η επιδεξιότητα του επιτρέπει να εκτελεί ταξόρκια πιο αποδοτικά και
-//τέλος η ευκινησία του επιτρέπει να μπορεί με κάποια πιθανότητα να αποφύγει κάποια επίθεση του αντιπάλου του.
-//Ενας ήρωας διαθέτει ένα ποσό χρημάτων (money) καθώς και ένα ποσό εμπειρίας (experience).
-//Οταν ο ήρωας αποκτήσει αρκετή εμπειρία, ανεβαίνει ένα επίπεδο(levelUp).
-//Σε κάθε επίπεδο, οι τιμές της δύναμης, της επιδεξιότητας και της ευκινησίας του ήρωα,αυξάνονται κατά κάποιο ποσό.
+// Συναρτήσεις της Hero
 
+// Constructor
 Hero::Hero(const char* initName, int strengthInit, int dexterityInit, int agilityInit)
 :   Hero::Living(initName, 1), magicPower(100), maxMagicPower(100),  strength(strengthInit), dexterity(dexterityInit),
 agility(agilityInit), money(50), experience(0), weapon(NULL), armor(NULL) { }
+
+// Αυξάνει την εμπειρία κατά amount, και ανά 100 μονάδες την μηδενίζει και αυξάνει κατά ένα επίπεδο τον ήρωα
 void Hero::gainExperience(int amount) {
     Hero::experience += amount;
     if (experience >= 100) {
@@ -201,17 +212,23 @@ void Hero::gainExperience(int amount) {
         experience -= 100*(experience/100);
     }
 }
+
+// Αυξάνει την MP κατά amount, χωρίς να ξεπερνά την maxMP
 void Hero::recoverMagicPower(int amount) {
     magicPower += amount;
     if (magicPower > maxMagicPower) {
         magicPower = maxMagicPower;
     }
 }
+
+// Λαμβάνει υπόψιν την πανοπλία και την ευκινησία, και καλεί την gainDamage της Living περνόντας την τροποποιημένη damage
 void Hero::gainDamage(int damage) {
     if ((rand() % (50 + agility)) < 50) {
         Living::gainDamage(damage - (armor == NULL ? 0 : armor->getDefense()));
     }
 }
+
+// Αν money >= amount, αφαιρείται το amount, και επιστρέφεται true. Αλλιώς false.
 bool Hero::spendMoney (int amount) {
     if (money >= amount) {
         money -= amount;
@@ -221,6 +238,18 @@ bool Hero::spendMoney (int amount) {
         return false;
     }
 }
+
+// Αν έχει αρκετά ψηλό επίπεδο χρησιμοποιεί το potion. Επιστρέφει το αν χρησιμοποιήθηκε.
+bool Hero::use(Potion& potion) {
+    if (getLevel() < potion.getMinLevel()) {
+        std::cout << "The hero's level is too low to use this potion" << std::endl;
+        return false;
+    }
+    potion.useOn(this);
+    return true;
+}
+
+// Αν έχει αρκετά ψηλό επίπεδο και αρκετή MP εκτελεί το spell στο enemy με αποδοτικότητα dexterity. Επιστρέφει το αν εκτελέστηκε.
 bool Hero::castSpell(const Spell& spell, Monster& enemy) {
     if (spell.getMagicCost() > magicPower) {
         std::cout << "Not enough magic power" << std::endl;
@@ -234,17 +263,8 @@ bool Hero::castSpell(const Spell& spell, Monster& enemy) {
     magicPower -= spell.getMagicCost();
     return true;
 }
-Armor* Hero::equip(Armor* newArmor) {
-    if (level >= newArmor->getMinLevel()) {
-        Armor* oldArmor = armor;
-        armor = newArmor;
-        return oldArmor;
-    }
-    else {
-        std::cout << "The hero's level is too low to equip this weapon" << std::endl;
-        return newArmor;
-    }
-}
+
+// Αν έχει αρκετά ψηλό επίπεδο παίρνει το newWeapon και επιστρέφει το παλιό. Αλλιώς επιστρέφει το καινούργιο.
 Weapon* Hero::equip(Weapon* newWeapon) {
     if (level >= newWeapon->getMinLevel()) {
         Weapon* oldWeapon = weapon;
@@ -256,12 +276,29 @@ Weapon* Hero::equip(Weapon* newWeapon) {
         return newWeapon;
     }
 }
+
+// Αν έχει αρκετά ψηλό επίπεδο βάζει την newArmor και επιστρέφει την παλιά. Αλλιώς επιστρέφει την καινούργια.
+Armor* Hero::equip(Armor* newArmor) {
+    if (level >= newArmor->getMinLevel()) {
+        Armor* oldArmor = armor;
+        armor = newArmor;
+        return oldArmor;
+    }
+    else {
+        std::cout << "The hero's level is too low to equip this weapon" << std::endl;
+        return newArmor;
+    }
+}
+
+// Αν HP != 0, ανακτά (recover) 1 HP και 1 MP.
 void Hero::endTurn() {
     if (getHealthPower() != 0) {
         recoverHealthPower(1);
         recoverMagicPower(1);
     }
 }
+
+// Καλεί τον εκτυπωτή της υπερκλάσης (Living) και εκτυπώνει τα στοιχεία του ήρωα
 void Hero::print() const {
     Living::print();
     std::cout << "MP:         " << magicPower << '\n';
@@ -285,45 +322,49 @@ void Hero::print() const {
     std::cout << "Experience: " << experience << std::endl;
 }
 
-//Ενας μαχητής (Warrior) είναι ένας ήρωας που είναι ευνοημένος στοντομέα  της  δύναμης  και  της  ευκινησίας.
-//Αυτό  σημαίνει  ότι  οι  αρχικές  τιμές  σε  αυτά  τα  στατιστικά,θα είναι υψηλότερες από τα υπόλοιπα, καθώς και ότι όταν ο ήρωας ανεβαίνει επίπεδο,
-//τα στατιστικάαυτά  θα  επηρεάζονται  περισσότερο. 
+// Συναρτήσεις της Warrior
 
-Warrior::Warrior(const char* initName) : Hero(initName, 5, 2, 5) { }
+// Καλεί την levelUp της υπερκλάσης (Hero) και αυξάνει τις ικανότητες του μαχητή, κυρίως την δύναμη και την ευκινησία
 void Warrior::levelUp(int times) {
     Hero::levelUp(times);
     strength += 3*times;
     dexterity += times;
     agility += 3*times;
 }
+
+// Εκτυπώνει τον τύπο του ήρωα και καλεί τον εκτυπωτή της υπερκλάσης (Hero)
 void Warrior::print() const {
     std::cout << "Type:       Warrior" << std::endl;
     Hero::print();
 }
 
-// Ενας  μάγος  (Sorcerer)  είναι  ένας  ήρωας  που  είναι  ευνοημένος στον τομέα της επιδεξιότητας και της ευκινησίας.
+// Συναρτήσεις της Sorcerer
 
-Sorcerer::Sorcerer(const char* initName) : Hero(initName, 2, 5, 5) { }
+// Καλεί την levelUp της υπερκλάσης (Hero) και αυξάνει τις ικανότητες του μάγου, κυρίως την επιδεξιότητα και την ευκινησία
 void Sorcerer::levelUp(int times) {
     Hero::levelUp(times);
     strength += times;
     dexterity += 3*times;
     agility += 3*times;
 }
+
+// Εκτυπώνει τον τύπο του ήρωα και καλεί τον εκτυπωτή της υπερκλάσης (Hero)
 void Sorcerer::print() const {
     std::cout << "Type:       Sorcerer" << std::endl;
     Hero::print();
 }
 
-//Ενας ιππότης (Paladin) είναι ένας ήρωας που είναιευνοημένος στον τομέα της δύναμης και της επιδεξιότητας.
+// Συναρτήσεις της Paladin
 
-Paladin::Paladin(const char* initName) : Hero(initName, 5, 5, 2) { }
+// Καλεί την levelUp της υπερκλάσης (Hero) και αυξάνει τις ικανότητες του ιππότη, κυρίως την δύναμη και την επιδεξιότητα
 void Paladin::levelUp(int times) {
     Hero::levelUp(times);
     strength += 3*times;
     dexterity += 3*times;
     agility += times;
 }
+
+// Εκτυπώνει τον τύπο του ήρωα και καλεί τον εκτυπωτή της υπερκλάσης (Hero)
 void Paladin::print() const {
     std::cout << "Type:       Paladin" << std::endl;
     Hero::print();
@@ -442,24 +483,24 @@ void Spirit::print() const {
     Monster::print();
 }
 
-Party::Party(HeroType* heroTypes, int heroNumInit) : heroNum(heroNumInit), party(new Hero*[heroNumInit]) {
+Party::Party(HeroType* heroTypes, int heroNumInit) : heroNum(heroNumInit), heroes(new Hero*[heroNumInit]) {
     for (int i = 0 ; i < heroNum ; ++i) {
         if (heroTypes[i] == warrior) {
-            party[i] = new Warrior(names[rand() % 98]);
+            heroes[i] = new Warrior(names[rand() % 98]);
         }
         else if (heroTypes[i] == sorcerer) {
-            party[i] = new Sorcerer(names[rand() % 98]);
+            heroes[i] = new Sorcerer(names[rand() % 98]);
         }
         else {
-            party[i] = new Paladin(names[rand() % 98]);
+            heroes[i] = new Paladin(names[rand() % 98]);
         }
     }
 }
 Party::~Party() {
     for (int i = 0 ; i < heroNum ; ++i) {
-        delete party[i];
+        delete heroes[i];
     }
-    delete[] party;
+    delete[] heroes;
 }
 bool Party::equip(Hero* hero) {
     std::cout << "What to equip?" << std::endl;
@@ -503,7 +544,7 @@ bool Party::equip(Hero* hero) {
                         --heroPos;
                     }   while ((heroPos < 0) || (heroPos >= heroNum));
                 }
-                hero = party[heroPos];
+                hero = heroes[heroPos];
             }
             Weapon* oldWeapon;
             if ((oldWeapon = hero->equip(toEquip)) != toEquip) {
@@ -554,7 +595,7 @@ bool Party::equip(Hero* hero) {
                         --heroPos;
                     }   while ((heroPos < 0) || (heroPos >= heroNum));
                 }
-                hero = party[heroPos];
+                hero = heroes[heroPos];
             }
             Armor* oldArmor;
             if ((oldArmor = hero->equip(toEquip)) != toEquip) {
@@ -614,7 +655,7 @@ bool Party::use(Hero* hero) {
                 --heroPos;
             }   while ((heroPos < 0) || (heroPos >= heroNum));
         }
-        hero = party[heroPos];
+        hero = heroes[heroPos];
     }
     if (hero->use(*toUse)) {
         ownedPotions.erase(ownedPotions.begin() + potionPos);
@@ -627,19 +668,19 @@ bool Party::use(Hero* hero) {
 bool Party::pay(int amount) {
     int totalMoney = 0;
     for (int i = 0 ; i < heroNum ; ++i) {
-        totalMoney += party[i]->getMoney();
+        totalMoney += heroes[i]->getMoney();
     }
     if (totalMoney < amount) {
         std::cout << "Not enough money" << std::endl;
         return false;
     }
     for (int i = 0 ; i < heroNum ; ++i) {
-        if (party[i]->spendMoney(amount)) {
+        if (heroes[i]->spendMoney(amount)) {
             break;
         }
         else {
-            amount -= party[i]->getMoney();
-            party[i]->spendMoney(party[i]->getMoney());
+            amount -= heroes[i]->getMoney();
+            heroes[i]->spendMoney(heroes[i]->getMoney());
         }
     }
     return true;
@@ -695,7 +736,7 @@ void Party::sell() {
                         std::cout << "Invalid input" << std::endl;
                     }
                 }
-                party[0]->spendMoney(-1*(ownedWeapons[weaponPos]->getPrice()/2));
+                heroes[0]->spendMoney(-1*(ownedWeapons[weaponPos]->getPrice()/2));
                 ownedWeapons.erase(ownedWeapons.begin() + weaponPos);
                 break;
             }
@@ -724,7 +765,7 @@ void Party::sell() {
                         std::cout << "Invalid input" << std::endl;
                     }
                 }
-                party[0]->spendMoney(-1*(ownedArmors[armorPos]->getPrice()/2));
+                heroes[0]->spendMoney(-1*(ownedArmors[armorPos]->getPrice()/2));
                 ownedArmors.erase(ownedArmors.begin() + armorPos);
                 break;
             }
@@ -753,7 +794,7 @@ void Party::sell() {
                         std::cout << "Invalid input" << std::endl;
                     }
                 }
-                party[0]->spendMoney(-1*(ownedPotions[potionPos]->getPrice()/2));
+                heroes[0]->spendMoney(-1*(ownedPotions[potionPos]->getPrice()/2));
                 ownedPotions.erase(ownedPotions.begin() + potionPos);
                 break;
             }
@@ -782,7 +823,7 @@ void Party::sell() {
                         std::cout << "Invalid input" << std::endl;
                     }
                 }
-                party[0]->spendMoney(-1*(ownedSpells[spellPos]->getPrice()/2));
+                heroes[0]->spendMoney(-1*(ownedSpells[spellPos]->getPrice()/2));
                 ownedSpells.erase(ownedSpells.begin() + spellPos);
                 break;
             }
@@ -815,7 +856,7 @@ void Party::battle() {
     std::cout << "Battle!" << std::endl;
     int averageHeroLevel = 0;
     for (int i = 0 ; i < heroNum ; ++i) {
-        averageHeroLevel += party[i]->getLevel();
+        averageHeroLevel += heroes[i]->getLevel();
     }
     averageHeroLevel /= heroNum;
     int monsterNum = heroNum + (rand() % 2);
@@ -854,10 +895,10 @@ void Party::battle() {
         }
         won = true, lost = true;
         for (int i = 0 ; i < heroNum ; ++i) {
-            if (party[i]->getHealthPower() != 0) {
+            if (heroes[i]->getHealthPower() != 0) {
                 lost = false;
                 while (true) {
-                    std::cout << "What should " << party[i]->getName() << " do?" << std::endl;
+                    std::cout << "What should " << heroes[i]->getName() << " do?" << std::endl;
                     std::cin >> input;
                     if (!input.compare("attack")) {
                         int numInput;
@@ -876,7 +917,7 @@ void Party::battle() {
                                 std::cout << "Invalid input" << std::endl;
                             }
                         }
-                        party[i]->attack(*monsters[numInput - 1]);
+                        heroes[i]->attack(*monsters[numInput - 1]);
                         break;
                     }
                     else if (!input.compare("castSpell")) {
@@ -919,17 +960,17 @@ void Party::battle() {
                                 std::cout << "Invalid input" << std::endl;
                             }
                         }
-                        if (party[i]->castSpell(*toCast, *monsters[numInput - 1])) {
+                        if (heroes[i]->castSpell(*toCast, *monsters[numInput - 1])) {
                             break;
                         }
                     }
                     else if (!input.compare("use")) {
-                        if (use(party[i])) {
+                        if (use(heroes[i])) {
                             break;
                         }
                     }
                     else if (!input.compare("equip")) {
-                        if (equip(party[i])) {
+                        if (equip(heroes[i])) {
                             break;
                         }
                     }
@@ -943,9 +984,9 @@ void Party::battle() {
             if (monsters[i]->getHealthPower() != 0) {
                 won = false;
                 for (int j = 0 ; j < heroNum; ++j) {
-                    if (party[j]->getHealthPower() != 0) {
-                        std::cout << monsters[i]->getName() << " attacks " << party[j]->getName() << "!" << std::endl;
-                        monsters[i]->attack(*party[j]);
+                    if (heroes[j]->getHealthPower() != 0) {
+                        std::cout << monsters[i]->getName() << " attacks " << heroes[j]->getName() << "!" << std::endl;
+                        monsters[i]->attack(*heroes[j]);
                         break;
                     }
                 }
@@ -955,7 +996,7 @@ void Party::battle() {
             break;
         }
         for (int i = 0 ; i < heroNum ; ++i) {
-            party[i]->endTurn();
+            heroes[i]->endTurn();
         }
         for (int i = 0 ; i < monsterNum ; ++i) {
             monsters[i]->endTurn();
@@ -964,19 +1005,19 @@ void Party::battle() {
     if (won) {
         std::cout << "The party has won!" << std::endl;
         for (int i = 0 ; i < heroNum ; ++i) {
-            party[i]->setMoney(party[i]->getMoney() + party[i]->getLevel()*10 + monsterNum*20);
-            party[i]->gainExperience(party[i]->getLevel()*5 + monsterNum*20);
+            heroes[i]->setMoney(heroes[i]->getMoney() + heroes[i]->getLevel()*10 + monsterNum*20);
+            heroes[i]->gainExperience(heroes[i]->getLevel()*5 + monsterNum*20);
         }
     }
     else {
         std::cout << "The party has lost!" << std::endl;
         for (int i = 0 ; i < heroNum ; ++i) {
-            party[i]->setMoney(party[i]->getMoney() / 2);
+            heroes[i]->setMoney(heroes[i]->getMoney() / 2);
         }
     }
     for (int i = 0 ; i < heroNum ; ++i) {
-        if (party[i]->getHealthPower() == 0) {
-            party[i]->recoverHealthPower(party[i]->getMaxHealthPower() / 2);
+        if (heroes[i]->getHealthPower() == 0) {
+            heroes[i]->recoverHealthPower(heroes[i]->getMaxHealthPower() / 2);
         }
     }
     for (int i = 0 ; i < monsterNum ; ++i) {
@@ -1005,7 +1046,7 @@ void Party::checkInventory() const {
 void Party::print() const {
     for (int i = 0 ; i < heroNum ; ++i) {
         std::cout << i + 1 << (i == 0 ? "st" : (i == 1 ? "nd" : "rd")) << " hero's stats: " << std::endl;
-        party[i]->print();
+        heroes[i]->print();
     }
 }
 
@@ -1233,7 +1274,7 @@ void Grid::playGame() {
         /*
         else if (!input.compare("up")) {
             for (int i = 0 ; i < heroNum ; ++i) {
-                party[i]->gainExperience(210);
+                heroes[i]->gainExperience(210);
             }
         }
         */
