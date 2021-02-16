@@ -16,12 +16,6 @@ void Item::print() const {
     std::cout << "Price:      " << price << '\n';
     std::cout << "Min Level:  " << minLevel << std::endl;
 }
-int Item::getPrice() const {
-    return price;
-}
-int Item::getMinLevel() const {
-    return minLevel;
-}
 
 //Ενα  όπλο  (Weapon)  είναι  ένααντικείμενο το οποίο μπορεί να χρησιμοποιηθεί από τον ήρωα για να επιτεθεί σε κάποιο τέρας. Εχει ένα συγκεκριμένο ποσό 
 //ζημιάς που προκαλεί στον αντίπαλο του και μπορεί να απαιτεί το ένα ή και ταδύο χέρια του ήρωα για να το χρησιμοποιεί.
@@ -34,12 +28,6 @@ void Weapon::print() const {
     std::cout << "Damage:     " << damage << '\n';
     std::cout << "Two-handed: " << (twoHanded ? "yes" : "no") << std::endl;
 }
-int Weapon::getDamage() const {
-    return damage;
-}
-bool Weapon::isTwoHanded() const {
-    return twoHanded;
-}
 
 // price = 10*damage - 20*two_handed
 
@@ -51,9 +39,6 @@ void Armor::print() const {
     std::cout << "Armor:" << '\n';
     Item::print();
     std::cout << "Defense:    " << defense << std::endl;
-}
-int Armor::getDefense() const {
-    return defense;
 }
 
 //price = 15*defense
@@ -126,9 +111,6 @@ void Spell::print() const {
     std::cout << "Max damage: " << maxDamage << '\n';
     std::cout << "Magic cost: " << magicCost << std::endl;
 }
-int Spell::getMagicCost() const {
-    return magicCost;
-}
 
 //price = 10*(mindamage+maxdamage)/2
 //magiccost = 2*(mindamage+maxdamage)/2
@@ -183,18 +165,6 @@ void Living::print() const {
     std::cout << "Level:      " << level << '\n';
     std::cout << "HP:         " << healthPower << '\n';
     std::cout << "Max HP:     " << maxHealthPower << std::endl;
-}
-int Living::getLevel() const {
-    return level;
-}
-std::string Living::getName() const {
-    return name;
-}
-int Living::getHealthPower() const {
-    return healthPower;
-}
-int Living::getMaxHealthPower() const {
-    return maxHealthPower;
 }
 void Living::recoverHealthPower(int amount) {
     healthPower += amount;
@@ -253,26 +223,11 @@ void Hero::addExperience(int amount) {
         experience -= 100*(experience/100);
     }
 }
-void Hero::levelUp(int times) {
-    level += times;
-}
-int Hero::getMoney() const {
-    return money;
-}
-void Hero::setMoney(int newMoney) {
-    money = newMoney;
-}
-int Hero::getMagicPower() const {
-    return magicPower;
-}
 void Hero::recoverMagicPower(int amount) {
     magicPower += amount;
     if (magicPower > maxMagicPower) {
         magicPower = maxMagicPower;
     }
-}
-void Hero::attack(Living& creature) const {
-    creature.gainDamage(strength + (weapon != NULL ? weapon->getDamage()*weapon->isTwoHanded() : 0));
 }
 void Hero::gainDamage(int damage) {
     if ((rand() % (50 + agility)) < 50) {
@@ -287,9 +242,6 @@ bool Hero::spendMoney (int amount) {
     else {
         return false;
     }
-}
-bool Hero::use(Potion& potion) {
-    return potion.useOn(this);
 }
 bool Hero::castSpell(const Spell& spell, Monster& enemy) {
     if (spell.getMagicCost() > magicPower) {
@@ -388,9 +340,6 @@ bool StatusEffect::passTurn() {
         return true;
     }
     return false;
-}
-int StatusEffect::getEffect() const {
-    return effect;
 }
 
 Monster::Monster(const char* initName, int initLevel, int initMinDamage, int initMaxDamage, int initDefense, int initAgility)
@@ -933,7 +882,7 @@ void Party::battle() {
                     else if (!input.compare("castSpell")) {
                         if (ownedSpells.size() == 0) {
                             std::cout << "No spells owned" << std::endl;
-                            return;
+                            continue;
                         }
                         std::cout << "Which spell to cast?" << std::endl;
                         int j = 0;
@@ -995,6 +944,7 @@ void Party::battle() {
                 won = false;
                 for (int j = 0 ; j < heroNum; ++j) {
                     if (party[j]->getHealthPower() != 0) {
+                        std::cout << monsters[i]->getName() << " attacks " << party[j]->getName() << "!" << std::endl;
                         monsters[i]->attack(*party[j]);
                         break;
                     }
@@ -1066,28 +1016,34 @@ Market::Market(int weaponNumInit, int armorNumInit, int potionNumInit, int spell
     int itemAmount = spellOffset + spellAmount;
     stock = new Item*[itemAmount];
     for (int i = 0 ; i < weaponAmount ; ++i) {
-        stock[i] = new Weapon(weaponNames[i], i + 1, i/10);
+        stock[i] = new Weapon(weaponNames[i], i + 1, i/(2*weaponAmount/3));
     }
     for (int i = weaponAmount ; i < potionOffset ; ++i) {
-        stock[i] = new Armor(armorNames[i - 15], i - 14);
+        stock[i] = new Armor(armorNames[i - weaponAmount], i - weaponAmount + 1);
     }
     for (int i = potionOffset ; i < potionOffset + potionAmount/3 ; ++i) {
-        stock[i] = new StrengthPotion(potionNames[i - 30], i - 29);
+        stock[i] = new StrengthPotion(potionNames[i - potionOffset], i - potionOffset + 1);
     }
     for (int i = potionOffset + potionAmount/3 ; i < potionOffset + (2*potionAmount)/3 ; ++i) {
-        stock[i] = new DexterityPotion(potionNames[i - 30], i - 34);
+        stock[i] = new DexterityPotion(potionNames[i - potionOffset], i - (potionOffset + potionAmount/3) + 1);
     }
     for (int i = potionOffset + (2*potionNumInit)/3 ; i < spellOffset ; ++i) {
-        stock[i] = new AgilityPotion(potionNames[i - 30], i - 39);
+        stock[i] = new AgilityPotion(potionNames[i - potionOffset], i - (potionOffset + (2*potionNumInit)/3) + 1);
     }
     for (int i = spellOffset ; i < spellOffset + spellAmount/3 ; ++i) {
-        stock[i] = new IceSpell(spellNames[i - 45], i - 44, 2*(i - 44), (i - 43)*5);
+        stock[i] = new IceSpell(spellNames[i - spellOffset], i - spellOffset + 1, 2*(i - spellOffset + 1), (i - spellOffset + 2)*5);
     }
     for (int i = spellOffset + spellAmount/3 ; i < spellOffset + (2*spellAmount)/3 ; ++i) {
-        stock[i] = new FireSpell(spellNames[i - 45], i - 49, 2*(i - 49), (i - 48)*5);
+        stock[i] = new FireSpell(spellNames[i - spellOffset],
+                                i - (spellOffset + spellAmount/3) + 1,
+                                2*(i - (spellOffset + spellAmount/3) + 1),
+                                (i - (spellOffset + spellAmount/3) + 2)*5);
     }
     for (int i = spellOffset + (2*spellAmount)/3 ; i < spellOffset + spellAmount ; ++i) {
-        stock[i] = new LightingSpell(spellNames[i - 45], i - 54, 2*(i - 54), (i - 53)*5);
+        stock[i] = new LightingSpell(spellNames[i - spellOffset],
+                                    i - (spellOffset + (2*spellAmount)/3) + 1,
+                                    2*(i - (spellOffset + (2*spellAmount)/3) + 1),
+                                    (i - (spellOffset + (2*spellAmount)/3) + 2)*5);
     }
 }
 Market::~Market() {
@@ -1336,7 +1292,6 @@ void Grid::move(Direction direction) {
         }
         ++position[0];
     }
-    std::cout << "pos: " << position[0] << " " << position[1] << std::endl;
     if ((grid[position[0]][position[1]] == common) && !(rand() % 4)) {
         party.battle();
     }

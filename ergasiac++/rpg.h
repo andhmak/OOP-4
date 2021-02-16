@@ -18,8 +18,8 @@ class Item {
     public:
         Item(const char* initName, int initPrice, int initMinLevel);
         virtual void print() const;
-        int getPrice() const;
-        int getMinLevel() const;
+        int getPrice() const { return price; }
+        int getMinLevel() const { return minLevel; }
 };
 
 //Ενα  όπλο  (Weapon)  είναι  ένααντικείμενο το οποίο μπορεί να χρησιμοποιηθεί από τον ήρωα για να επιτεθεί σε κάποιο τέρας. Εχει ένα συγκεκριμένο ποσό 
@@ -31,8 +31,8 @@ class Weapon : public Item {
     public:
         Weapon(const char* initName, int initDamage, int initTwoHanded);
         void print() const;
-        int getDamage() const;
-        bool isTwoHanded() const;
+        int getDamage() const { return damage; }
+        bool isTwoHanded() const { return twoHanded; }
 };
 
 // price = 10*damage - 20*two_handed
@@ -44,7 +44,7 @@ class Armor : public Item {
     public:
         Armor(const char* initName, int initDefense);
         void print() const;
-        int getDefense() const;
+        int getDefense() const { return defense; }
 };
 
 //price = 15*defense
@@ -101,7 +101,7 @@ class Spell : public Item {
     public:
         Spell(const char* initName, int initMinDamage, int initMaxDamage, int initMagicCost);
         virtual void print() const;
-        int getMagicCost() const;
+        int getMagicCost() const { return magicCost; }
         virtual void cast(Monster& enemy, int efficiency) const = 0;
 };
 
@@ -149,10 +149,10 @@ class Living {
     public:
         Living(const char* initName, int initLevel);
         void print() const;
-        int getLevel() const;
-        std::string getName() const;
-        int getHealthPower() const;
-        int getMaxHealthPower() const;
+        int getLevel() const { return level; }
+        std::string getName() const { return name; }
+        int getHealthPower() const { return healthPower; }
+        int getMaxHealthPower() const { return maxHealthPower; }
         void recoverHealthPower(int amount);
         virtual void gainDamage(int damage);
 };
@@ -181,18 +181,18 @@ class Hero : public Living {
         Hero(const char* initName, int strengthInit, int dexterityInit, int agilityInit);
         virtual void print() const;
         void addExperience(int amount);
-        virtual void levelUp(int times);
+        virtual void levelUp(int times) { level += times; }
         void addStrength(int amount) { strength += amount; }
         void addDexterity(int amount) { dexterity += amount; }
         void addAgility(int amount) { agility += amount; }
-        int getMoney() const;
-        void setMoney(int newMoney);
-        int getMagicPower() const;
+        int getMoney() const { return money; }
+        void setMoney(int newMoney) { money = newMoney; }
+        int getMagicPower() const { return magicPower; }
         void recoverMagicPower(int amount);
-        void attack(Living& creature) const;
+        void attack(Living& creature) const { creature.gainDamage(strength + (weapon != NULL ? weapon->getDamage()*weapon->isTwoHanded() : 0)); }
         void gainDamage(int damage);
         bool spendMoney (int amount);
-        bool use(Potion& potion);
+        bool use(Potion& potion) { return potion.useOn(this); }
         bool castSpell(const Spell& spell, Monster& enemy);
         Armor* equip(Armor* newArmor);
         Weapon* equip(Weapon* newWeapon);
@@ -238,7 +238,7 @@ class StatusEffect {
     public:
         StatusEffect(int initEffect, int initTurns);
         bool passTurn();
-        int getEffect() const;
+        int getEffect() const { return effect; }
 };
 
 class Monster : public Living {
