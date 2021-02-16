@@ -8,18 +8,16 @@
 #include <vector>
 #include <list>
 
-// ́Ενα  αντικείμενο  (Item)  έχει  ένα  όνομα,
-//   μία  τιμή  αγοράς  και  έχει  και  κάποιο  ελάχιστο  επίπεδοστο  οποίο  πρέπει  να  βρίσκεται  ο  ήρωας  για  να  το  χρησιμοποιήσει.z
-
+// Κλάση που αναπαριστά ένα αντικείμενο
 class Item {
-    std::string name;
-    int price;
-    int minLevel;
+    std::string name;   // όνομα του αντικειμένου 
+    int price;          // τιμή αγοράς του
+    int minLevel;       // ελάχιστο επίπεδο στο οποίο πρέπει να βρίσκεται ο ήρωας για να το χρησιμοποιήσει
     public:
         Item(const char* initName, int initPrice, int initMinLevel);
-        virtual void print() const;
         int getPrice() const { return price; }
         int getMinLevel() const { return minLevel; }
+        virtual void print() const;
 };
 
 //Ενα  όπλο  (Weapon)  είναι  ένααντικείμενο το οποίο μπορεί να χρησιμοποιηθεί από τον ήρωα για να επιτεθεί σε κάποιο τέρας. Εχει ένα συγκεκριμένο ποσό 
@@ -30,9 +28,9 @@ class Weapon : public Item {
     bool twoHanded;
     public:
         Weapon(const char* initName, int initDamage, int initTwoHanded);
-        void print() const;
         int getDamage() const { return damage; }
         bool isTwoHanded() const { return twoHanded; }
+        void print() const;
 };
 
 // price = 10*damage - 20*two_handed
@@ -43,8 +41,8 @@ class Armor : public Item {
     int defense;
     public:
         Armor(const char* initName, int initDefense);
-        void print() const;
         int getDefense() const { return defense; }
+        void print() const;
 };
 
 //price = 15*defense
@@ -100,9 +98,9 @@ class Spell : public Item {
         int magicCost;
     public:
         Spell(const char* initName, int initMinDamage, int initMaxDamage, int initMagicCost);
-        virtual void print() const;
         int getMagicCost() const { return magicCost; }
         virtual void cast(Monster& enemy, int efficiency) const = 0;
+        virtual void print() const;
 };
 
 //price = 10*(mindamage+maxdamage)/2
@@ -113,8 +111,8 @@ class Spell : public Item {
 class IceSpell : public Spell {
     public:
         IceSpell(const char* initName, int initMinDamage, int initMaxDamage, int initMagicCost);
-        virtual void print() const;
         void cast(Monster& enemy, int efficiency) const;
+        virtual void print() const;
 };
 
 //Ενα ξόρκι φωτιάς (FireSpell) είναι ένα ξόρκι το οποίο,  εκτός απότη ζημιά που προκαλεί, μειώνει και το ποσό άμυνας του αντιπάλου για κάποιους γύρους. 
@@ -122,8 +120,8 @@ class IceSpell : public Spell {
 class FireSpell : public Spell {
     public:
         FireSpell(const char* initName, int initMinDamage, int initMaxDamage, int initMagicCost);
-        virtual void print() const;
         void cast(Monster& enemy, int efficiency) const;
+        virtual void print() const;
 }; 
 
 //Ενα ξόρκι ηλεκτρισμού (LightingSpell) είναι ένα ξόρκι το οποίο, εκτός από τη ζημιά που προκαλεί, μειώνει καιτην πιθανότητα να αποφύγει μια επίθεση ο
@@ -132,8 +130,8 @@ class FireSpell : public Spell {
 class LightingSpell : public Spell {
     public:
         LightingSpell(const char* initName, int initMinDamage, int initMaxDamage, int initMagicCost);
-        virtual void print() const;
         void cast(Monster& enemy, int efficiency) const;
+        virtual void print() const;
 };
 
 //Ενα ζωντανό ον (Living) αντιπροσωπεύει μια ζωντανή οντότητα του κόσμου του παιχνιδιού.
@@ -148,13 +146,13 @@ class Living {
         int maxHealthPower;
     public:
         Living(const char* initName, int initLevel);
-        void print() const;
-        int getLevel() const { return level; }
         std::string getName() const { return name; }
+        int getLevel() const { return level; }
         int getHealthPower() const { return healthPower; }
         int getMaxHealthPower() const { return maxHealthPower; }
         void recoverHealthPower(int amount);
         virtual void gainDamage(int damage);
+        void print() const;
 };
 
 //Ενας ήρωας (Hero) είναι έναζωντανό ον.
@@ -179,24 +177,24 @@ class Hero : public Living {
         Armor* armor;
     public:
         Hero(const char* initName, int strengthInit, int dexterityInit, int agilityInit);
-        virtual void print() const;
-        void addExperience(int amount);
-        virtual void levelUp(int times) { level += times; }
+        int getMagicPower() const { return magicPower; }
+        int getMoney() const { return money; }
+        void setMoney(int newMoney) { money = newMoney; }
         void addStrength(int amount) { strength += amount; }
         void addDexterity(int amount) { dexterity += amount; }
         void addAgility(int amount) { agility += amount; }
-        int getMoney() const { return money; }
-        void setMoney(int newMoney) { money = newMoney; }
-        int getMagicPower() const { return magicPower; }
+        virtual void levelUp(int times) { level += times; }
+        void gainExperience(int amount);
         void recoverMagicPower(int amount);
-        void attack(Living& creature) const { creature.gainDamage(strength + (weapon != NULL ? weapon->getDamage()*weapon->isTwoHanded() : 0)); }
         void gainDamage(int damage);
         bool spendMoney (int amount);
+        void attack(Living& creature) const { creature.gainDamage(strength + (weapon != NULL ? weapon->getDamage()*weapon->isTwoHanded() : 0)); }
         bool use(Potion& potion) { return potion.useOn(this); }
         bool castSpell(const Spell& spell, Monster& enemy);
         Armor* equip(Armor* newArmor);
         Weapon* equip(Weapon* newWeapon);
         void endTurn();
+        virtual void print() const;
 };
 
 //Ενας μαχητής (Warrior) είναι ένας ήρωας που είναι ευνοημένος στοντομέα  της  δύναμης  και  της  ευκινησίας.

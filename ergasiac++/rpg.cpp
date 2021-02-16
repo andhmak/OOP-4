@@ -119,26 +119,26 @@ void Spell::print() const {
 
 IceSpell::IceSpell(const char* initName, int initMinDamage, int initMaxDamage, int initMagicCost)
 :   Spell(initName, initMinDamage, initMaxDamage, initMagicCost) { }
-void IceSpell::print() const {
-    std::cout << "Ice spell:" << std::endl;
-    Spell::print();
-}
 void IceSpell::cast(Monster& enemy, int efficiency) const {
     int damage = minDamage + (maxDamage - minDamage)*((efficiency)/(efficiency + 5));
     enemy.gainDamageStatusEffect(-1*damage, 3);
+}
+void IceSpell::print() const {
+    std::cout << "Ice spell:" << std::endl;
+    Spell::print();
 }
 
 //Ενα ξόρκι φωτιάς (FireSpell) είναι ένα ξόρκι το οποίο,  εκτός απότη ζημιά που προκαλεί, μειώνει και το ποσό άμυνας του αντιπάλου για κάποιους γύρους. 
 
 FireSpell::FireSpell(const char* initName, int initMinDamage, int initMaxDamage, int initMagicCost)
 :   Spell(initName, initMinDamage, initMaxDamage, initMagicCost) { }
-void FireSpell::print() const {
-    std::cout << "Fire spell:" << std::endl;
-    Spell::print();
-}
 void FireSpell::cast(Monster& enemy, int efficiency) const {
     int damage = std::max(minDamage, maxDamage*((efficiency)/(efficiency + 1)));
     enemy.gainDefenseStatusEffect(-1*damage, 3);
+}
+void FireSpell::print() const {
+    std::cout << "Fire spell:" << std::endl;
+    Spell::print();
 }
 
 //Ενα ξόρκι ηλεκτρισμού (LightingSpell) είναι ένα ξόρκι το οποίο, εκτός από τη ζημιά που προκαλεί, μειώνει καιτην πιθανότητα να αποφύγει μια επίθεση ο
@@ -146,13 +146,13 @@ void FireSpell::cast(Monster& enemy, int efficiency) const {
 
 LightingSpell::LightingSpell(const char* initName, int initMinDamage, int initMaxDamage, int initMagicCost)
 :   Spell(initName, initMinDamage, initMaxDamage, initMagicCost) { }
-void LightingSpell::print() const {
-    std::cout << "Lighting spell:" << std::endl;
-    Spell::print();
-}
 void LightingSpell::cast(Monster& enemy, int efficiency) const {
     int damage = std::max(minDamage, maxDamage*((efficiency)/(efficiency + 1)));
     enemy.gainAgilityStatusEffect(-1*damage, 3);
+}
+void LightingSpell::print() const {
+    std::cout << "Lighting spell:" << std::endl;
+    Spell::print();
 }
 
 //Ενα ζωντανό ον (Living) αντιπροσωπεύει μια ζωντανή οντότητα του κόσμου του παιχνιδιού.
@@ -160,12 +160,6 @@ void LightingSpell::cast(Monster& enemy, int efficiency) const {
 //Οταν η ζωτική ενέργεια  του  φτάσει  στο  μηδέν,  το  ζωντανό  ον  λιποθυμάει.
 
 Living::Living(const char* initName, int initLevel) : name(initName), level(initLevel), healthPower(50), maxHealthPower(50) { }
-void Living::print() const {
-    std::cout << "Name:       " << name << '\n';
-    std::cout << "Level:      " << level << '\n';
-    std::cout << "HP:         " << healthPower << '\n';
-    std::cout << "Max HP:     " << maxHealthPower << std::endl;
-}
 void Living::recoverHealthPower(int amount) {
     healthPower += amount;
     if (healthPower > maxHealthPower) {
@@ -181,6 +175,12 @@ void Living::gainDamage(int damage) {
         std::cout << name << " has fainted!" << std::endl;
     }
 }
+void Living::print() const {
+    std::cout << "Name:       " << name << '\n';
+    std::cout << "Level:      " << level << '\n';
+    std::cout << "HP:         " << healthPower << '\n';
+    std::cout << "Max HP:     " << maxHealthPower << std::endl;
+}
 
 //Ενας ήρωας (Hero) είναι έναζωντανό ον.
 //Εχει ένα ποσό μαγικής ενέργειας (magicPower), καθώς και κάποια χαρακτηριστικάπου επηρεάζουν την ικανότητα του στη μάχη.
@@ -194,29 +194,7 @@ void Living::gainDamage(int damage) {
 Hero::Hero(const char* initName, int strengthInit, int dexterityInit, int agilityInit)
 :   Hero::Living(initName, 1), magicPower(100), maxMagicPower(100),  strength(strengthInit), dexterity(dexterityInit),
 agility(agilityInit), money(50), experience(0), weapon(NULL), armor(NULL) { }
-void Hero::print() const {
-    Living::print();
-    std::cout << "MP:         " << magicPower << '\n';
-    std::cout << "Max MP:     " << maxMagicPower << '\n';
-    std::cout << "Strength:   " << strength;
-    if (weapon != NULL) {
-        std::cout << "+" << weapon->getDamage();
-    }
-    std::cout << '\n';
-    std::cout << "Dexterity:  " << dexterity << '\n';
-    std::cout << "Agility:    " << agility << '\n';
-    std::cout << "Defense:    ";
-    if (armor != NULL) {
-        std::cout << armor->getDefense();
-    }
-    else {
-        std::cout << 0;
-    }
-    std::cout << '\n';
-    std::cout << "Money:      " << money << '\n';
-    std::cout << "Experience: " << experience << std::endl;
-}
-void Hero::addExperience(int amount) {
+void Hero::gainExperience(int amount) {
     Hero::experience += amount;
     if (experience >= 100) {
         levelUp(experience/100);
@@ -283,6 +261,28 @@ void Hero::endTurn() {
         recoverHealthPower(1);
         recoverMagicPower(1);
     }
+}
+void Hero::print() const {
+    Living::print();
+    std::cout << "MP:         " << magicPower << '\n';
+    std::cout << "Max MP:     " << maxMagicPower << '\n';
+    std::cout << "Strength:   " << strength;
+    if (weapon != NULL) {
+        std::cout << "+" << weapon->getDamage();
+    }
+    std::cout << '\n';
+    std::cout << "Dexterity:  " << dexterity << '\n';
+    std::cout << "Agility:    " << agility << '\n';
+    std::cout << "Defense:    ";
+    if (armor != NULL) {
+        std::cout << armor->getDefense();
+    }
+    else {
+        std::cout << 0;
+    }
+    std::cout << '\n';
+    std::cout << "Money:      " << money << '\n';
+    std::cout << "Experience: " << experience << std::endl;
 }
 
 //Ενας μαχητής (Warrior) είναι ένας ήρωας που είναι ευνοημένος στοντομέα  της  δύναμης  και  της  ευκινησίας.
@@ -965,7 +965,7 @@ void Party::battle() {
         std::cout << "The party has won!" << std::endl;
         for (int i = 0 ; i < heroNum ; ++i) {
             party[i]->setMoney(party[i]->getMoney() + party[i]->getLevel()*10 + monsterNum*20);
-            party[i]->addExperience(party[i]->getLevel()*5 + monsterNum*20);
+            party[i]->gainExperience(party[i]->getLevel()*5 + monsterNum*20);
         }
     }
     else {
@@ -1233,7 +1233,7 @@ void Grid::playGame() {
         /*
         else if (!input.compare("up")) {
             for (int i = 0 ; i < heroNum ; ++i) {
-                party[i]->addExperience(210);
+                party[i]->gainExperience(210);
             }
         }
         */
