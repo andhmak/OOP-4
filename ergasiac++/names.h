@@ -50,7 +50,7 @@ const char* weaponNames[119] = {
     "Rod of Silence", "Rod of Darkness", "Rod of Wisdom", "Rod of Fire",
     "Rod of Ice", "Rod of Lightning", "Rod of Water", "Malleable Staff",
     "Force Rod", "Ductile Rod", "Sorcery Rod", "Full Metal Rod",
-    "Rune Rod", "Enchanted Rod", "Rod of Striking", "Spiked Rod",
+    "Rune Rod", "Enchanted Rod", "Rod of Striking", "Spiked Rod"
 };
 
 const char* armorNames[80] = {
@@ -74,7 +74,7 @@ const char* armorNames[80] = {
     "Adept's Shield", "Tetra Shield", "Mythril Shield", "Gold Shield",
     "Emerald Shield", "Soldier's Shield", "Mage's Shield", "Silver Shield",
     "Onyx Shield", "Sorcery Shield", "Warrior's Shield", "Glorious Shield",
-    "Metal Shield", "Pearl Shield", "Magic Shield", "Seeker's Shield",
+    "Metal Shield", "Pearl Shield", "Magic Shield", "Seeker's Shield"
 };
 
 const char* potionNames[66] = {
@@ -93,7 +93,7 @@ const char* potionNames[66] = {
     "Designer Wallet", "Door to Tomorrow", "Gambler's Spirit",
     "Hypello Potion", "Mana Distiller", "Map", "Musk", "Pendulum",
     "Power Distiller", "Shining Thorn", "Speed Distiller",
-    "Underdog's Secret", "Wings to Discovery", "Winning Formula",
+    "Underdog's Secret", "Wings to Discovery", "Winning Formula"
 };
 
 const char* spellNames[91] = {
@@ -113,5 +113,5 @@ const char* spellNames[91] = {
     "Burn the Soul", "Fire Wings", "Fury of Osano-Wo", "Gaijin Flames",
     "Hungry Blade", "Yakamo’s Wrath", "Yakamo’s Eye", "Breath of Suitengu",
     "The Inner Ocean", "Surging Soul", "Endless Depth", "Kharmic Intent",
-    "Whispered Blade",
+    "Whispered Blade"
 };

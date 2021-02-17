@@ -7,7 +7,7 @@
 #include "rpg.h"
 #include "names.h"
 
-// Συναρτήσεις της Item
+/* ----- Συναρτήσεις της Item ----- */
 
 // Constructor
 Item::Item(const char* initName, int initPrice, int initMinLevel) : name(initName), price(initPrice), minLevel(initMinLevel) { }
@@ -17,12 +17,7 @@ void Item::print() const {
     std::cout << "Min Level:  " << minLevel << std::endl;
 }
 
-// Συναρτήσεις της Weapon
-
-// Constructor. Δίνονται όνομα, ζημία και το αν χρησιμοποιείται με τα δύο χέρια.
-// Τιμή και ελάχιστο επίπεδο υπολογίζονται συναρτήσει των τελευταίων δύο.
-Weapon::Weapon(const char* initName, int initDamage, int initTwoHanded)
-:   Item(initName, 10*initDamage*(initTwoHanded ? 2 : 1), initDamage/(initTwoHanded ? 1 : 3) + 1), damage(initDamage), twoHanded(initTwoHanded) { }
+/* ----- Συναρτήσεις της Weapon ----- */
 
 // Εκτυπώνει τα δεδομένα του όπλου και καλεί τον εκτυπωτή της υπερκλάσης (Item)
 void Weapon::print() const {
@@ -32,11 +27,7 @@ void Weapon::print() const {
     std::cout << "Two-handed: " << (twoHanded ? "yes" : "no") << std::endl;
 }
 
-// Συναρτήσεις της Armor
-
-// Constructor. Δίνονται όνομα και άμυνα. Τιμή και ελάχιστο επίπεδο υπολογίζονται συναρτήσει της άμυνας.
-Armor::Armor(const char* initName, int initDefense)
-:   Item(initName, 15*initDefense, initDefense/3 + 1), defense(initDefense) { }
+/* ----- Συναρτήσεις της Armor ----- */
 
 // Εκτυπώνει τα δεδομένα της πανοπλίας και καλεί τον εκτυπωτή της υπερκλάσης (Item)
 void Armor::print() const {
@@ -45,11 +36,7 @@ void Armor::print() const {
     std::cout << "Defense:    " << defense << std::endl;
 }
 
-// Συναρτήσεις της Potion
-
-// Constructor. Δίνονται όνομα και δραστικότητα. Τιμή και ελάχιστο επίπεδο υπολογίζονται συναρτήσει της δραστικότητα.
-Potion::Potion(const char* initName, int initEffect)
-:   Item(initName, 30*initEffect, initEffect/2 + 1), effect(initEffect) { }
+/* ----- Συναρτήσεις της Potion ----- */
 
 // Εκτυπώνει τα δεδομένα του φίλτρου και καλεί τον εκτυπωτή της υπερκλάσης (Item)
 void Potion::print() const {
@@ -57,7 +44,7 @@ void Potion::print() const {
     Item::print();
 }
 
-// Συναρτήσεις της StrengthPotion
+/* ----- Συναρτήσεις της StrengthPotion ----- */
 
 // Αυξάνεται η δύναμη του ήρωα hero κατά effect.
 void StrengthPotion::useOn(Hero* hero) {
@@ -70,7 +57,7 @@ void StrengthPotion::print() const {
     std::cout << "Strength:   +" << effect << std::endl;
 }
 
-// Συναρτήσεις της DexterityPotion
+/* ----- Συναρτήσεις της DexterityPotion ----- */
 
 // Αυξάνεται η επιδεξιότητα του ήρωα hero κατά effect.
 void DexterityPotion::useOn(Hero* hero) {
@@ -83,7 +70,7 @@ void DexterityPotion::print() const {
     std::cout << "Dexterity:  +" << effect << std::endl;
 }
 
-// Συναρτήσεις της AgilityPotion
+/* ----- Συναρτήσεις της AgilityPotion ----- */
 
 // Αυξάνεται η ευκινησία του ήρωα hero κατά effect.
 void AgilityPotion::useOn(Hero* hero) {
@@ -96,7 +83,7 @@ void AgilityPotion::print() const {
     std::cout << "Agility:    +" << effect << std::endl;
 }
 
-// Συναρτήσεις της Spell
+/* ----- Συναρτήσεις της Spell ----- */
 
 // Constructor. Δίνονται όνομα, εύρος ζημίας και μαγικό κόστος. Τιμή και ελάχιστο επίπεδο υπολογίζονται συναρτήσει των προηγούμενων.
 Spell::Spell(const char* initName, int initMinDamage, int initMaxDamage, int initMagicCost)
@@ -117,7 +104,7 @@ void Spell::print() const {
     std::cout << "Magic cost: " << magicCost << std::endl;
 }
 
-// Συναρτήσεις της IceSpell
+/* ----- Συναρτήσεις της IceSpell ----- */
 
 // Εκτελεί το ξόρκι στο τέρας enemy με αποδοτικότητα efficiency.
 // Εκτός από ζημία που προκαλεί δίνει και ένα αρνητικό status effect δύναμης στο enemy διάρκειας 3 γύρων.
@@ -133,7 +120,7 @@ void IceSpell::print() const {
     Spell::print();
 }
 
-// Συναρτήσεις της FireSpell
+/* ----- Συναρτήσεις της FireSpell ----- */
 
 // Εκτελεί το ξόρκι στο τέρας enemy με αποδοτικότητα efficiency.
 // Εκτός από ζημία που προκαλεί δίνει και ένα αρνητικό status effect άμυνας στο enemy διάρκειας 3 γύρων.
@@ -149,7 +136,7 @@ void FireSpell::print() const {
     Spell::print();
 }
 
-// Συναρτήσεις της LightingSpell
+/* ----- Συναρτήσεις της LightingSpell ----- */
 
 // Εκτελεί το ξόρκι στο τέρας enemy με αποδοτικότητα efficiency.
 // Εκτός από ζημία που προκαλεί δίνει και ένα αρνητικό status effect ευκινησίας στο enemy διάρκειας 3 γύρων.
@@ -165,10 +152,7 @@ void LightingSpell::print() const {
     Spell::print();
 }
 
-// Συναρτήσεις της Living
-
-// Constructor
-Living::Living(const char* initName, int initLevel) : name(initName), level(initLevel), healthPower(50), maxHealthPower(50) { }
+/* ----- Συναρτήσεις της Living ----- */
 
 // Αυξάνει την healthPower κατά amount, χωρίς να ξεπερνά την maxHealthPower
 void Living::recoverHealthPower(int amount) {
@@ -197,7 +181,7 @@ void Living::print() const {
     std::cout << "Max HP:     " << maxHealthPower << std::endl;
 }
 
-// Συναρτήσεις της Hero
+/* ----- Συναρτήσεις της Hero ----- */
 
 // Constructor
 Hero::Hero(const char* initName, int strengthInit, int dexterityInit, int agilityInit)
@@ -322,7 +306,7 @@ void Hero::print() const {
     std::cout << "Experience: " << experience << std::endl;
 }
 
-// Συναρτήσεις της Warrior
+/* ----- Συναρτήσεις της Warrior ----- */
 
 // Καλεί την levelUp της υπερκλάσης (Hero) και αυξάνει τις ικανότητες του μαχητή, κυρίως την δύναμη και την ευκινησία
 void Warrior::levelUp(int times) {
@@ -338,7 +322,7 @@ void Warrior::print() const {
     Hero::print();
 }
 
-// Συναρτήσεις της Sorcerer
+/* ----- Συναρτήσεις της Sorcerer ----- */
 
 // Καλεί την levelUp της υπερκλάσης (Hero) και αυξάνει τις ικανότητες του μάγου, κυρίως την επιδεξιότητα και την ευκινησία
 void Sorcerer::levelUp(int times) {
@@ -354,7 +338,7 @@ void Sorcerer::print() const {
     Hero::print();
 }
 
-// Συναρτήσεις της Paladin
+/* ----- Συναρτήσεις της Paladin ----- */
 
 // Καλεί την levelUp της υπερκλάσης (Hero) και αυξάνει τις ικανότητες του ιππότη, κυρίως την δύναμη και την επιδεξιότητα
 void Paladin::levelUp(int times) {
@@ -370,7 +354,7 @@ void Paladin::print() const {
     Hero::print();
 }
 
-// Συναρτήσεις της Monster
+/* ----- Συναρτήσεις της Monster ----- */
 
 // Destructor
 Monster::~Monster() {
@@ -452,7 +436,7 @@ void Monster::print() const {
     std::cout << "Agility:    " << agility << std::endl;
 }
 
-// Συναρτήσεις της Dragon
+/* ----- Συναρτήσεις της Dragon ----- */
 
 // Εκτυπώνει τον τύπο του τέρατος και καλεί τον εκτυπωτή της υπερκλάσης (Monster)
 void Dragon::print() const {
@@ -460,7 +444,7 @@ void Dragon::print() const {
     Monster::print();
 }
 
-// Συναρτήσεις της Exoskeleton
+/* ----- Συναρτήσεις της Exoskeleton ----- */
 
 // Εκτυπώνει τον τύπο του τέρατος και καλεί τον εκτυπωτή της υπερκλάσης (Monster)
 void Exoskeleton::print() const {
@@ -468,7 +452,7 @@ void Exoskeleton::print() const {
     Monster::print();
 }
 
-// Συναρτήσεις της Spirit
+/* ----- Συναρτήσεις της Spirit ----- */
 
 // Εκτυπώνει τον τύπο του τέρατος και καλεί τον εκτυπωτή της υπερκλάσης (Monster)
 void Spirit::print() const {
@@ -476,7 +460,7 @@ void Spirit::print() const {
     Monster::print();
 }
 
-// Συναρτήσεις της Party
+/* ----- Συναρτήσεις της Party ----- */
 
 // Constructor
 Party::Party(HeroType* heroTypes, int heroNumInit) : heroNum(heroNumInit), heroes(new Hero*[heroNumInit]) {
@@ -1082,7 +1066,7 @@ void Party::displayHeroStats() const {
     }
 }
 
-// Συναρτήσεις της Market
+/* ----- Συναρτήσεις της Market ----- */
 
 // Constructor. Τα αντικείμενα φτιάχνονται κατά αύξουσα "δύναμη". Όσο περισσότερα τόσο πιο "δυνατό" το τελευταίο.
 // Τα φίλτρα χωρίζονται δια τρία σε δύναμης, επιδεξιότητας και ετκινησίας, και τα ξόρκια σε πάγου, φωτιάς και ηλεκτρισμού.
@@ -1220,7 +1204,7 @@ void Market::buy(Party& party) {
     }
 }
 
-// Συναρτήσεις της Grid
+/* ----- Συναρτήσεις της Grid ----- */
 
 // Constructor. Ορίζει τυχαία το είδος των τετργώνων εκτός από το αρχικό, που είναι common.
 // Φτιάχνει μια ομάδα όπως ορίζουν τα ορίσματα και μια αγορά με 15 αντικείμενα κάθε είδους,
@@ -1394,7 +1378,7 @@ void Grid::move(Direction direction) {
 void Grid::displayMap() const {
     for (int i = 0 ; i < width ; ++i) {
         for (int j = 0 ; j < height ; ++j) {
-            std::cout << "Square " << i << ", " << j << ":" << '\n';
+            std::cout << "Square " << i + 1 << ", " << j + 1 << ":" << '\n';
             if (grid[i][j] == nonAccesible) {
                 std::cout << "Non-accessible" << '\n';
             }
