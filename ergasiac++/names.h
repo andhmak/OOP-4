@@ -1,3 +1,5 @@
+/* File: names.h */
+
 const char* names[98] = {
     "Abbathor", "Aerdrie Faenya", "Arvoreen", "Baervan Wildwanderer",
     "Baravar Cloakshadow", "Berronar Truesilver", "Brandobaris",

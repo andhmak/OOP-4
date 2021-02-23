@@ -486,7 +486,7 @@ enum Square { nonAccesible, market, common };
 // Κατευθύνσεις κίνησης στο πλέγμα
 enum Direction { upDir, downDir, leftDir, rightDir };
 
-// Κλάση που αναπαριστά ένα πλέγμα παιχνιδιού
+// Κλάση που αναπαριστά ένα πλέγμα/κόσμο παιχνιδιού
 class Grid {
     Square** grid;      // το πλέγμα των τετραγώνων
     int width;          // το πλάτος του πλέγματος
@@ -512,7 +512,7 @@ class Grid {
         // Κινεί την ομάδα προς την κατεύθυνση direction.
         // Αν πάει σε common τετράγωνο υπάρχει μια πιθανότητα να ξεκινήσει μάχη της ομάδας (battle) με τέρατα.
         void move(Direction direction);
-        
+
         // Εκτυπώνει το πλέγμα, δηλαδή το είδος κάθε κουτιού και το πού βρίκεται η ομάδα.
         void displayMap() const;
 };

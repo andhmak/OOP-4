@@ -303,7 +303,7 @@ void Hero::print() const {
     }
     std::cout << '\n';
     std::cout << "Money:      " << money << '\n';
-    std::cout << "Experience: " << experience << std::endl;
+    std::cout << "Experience: " << experience << '\n' << std::endl;
 }
 
 /* ----- Συναρτήσεις της Warrior ----- */
@@ -400,29 +400,39 @@ void Monster::gainAgilityStatusEffect(int amount, int turns) {
 
 // Αν HP != 0, ανακτά (recover) 1 HP και περνάει ένας γύρος για κάθε status effect.
 void Monster::endTurn() {
+    // ανάκτηση HP
     if (getHealthPower() != 0) {
         recoverHealthPower(1);
     }
+
+    // για τα status effects δύναμης
     for (std::list<StatusEffect*>::iterator it = damageStatusEffects.begin() ; it != damageStatusEffects.end() ; ++it) {
+        // αν τελειώσουν οι γύροι
         if ((*it)->passTurn()) {
-            minDamage -= (*it)->getEffect();
-            maxDamage -= (*it)->getEffect();
-            delete *it;
-            it = damageStatusEffects.erase(it);
+            minDamage -= (*it)->getEffect();    // αναιρείται
+            maxDamage -= (*it)->getEffect();    // η μεταβολή
+            delete *it;                         // αφαιρείται το
+            it = damageStatusEffects.erase(it); // status effect
         }
     }
+
+    // για τα status effects άμυνας
     for (std::list<StatusEffect*>::iterator it = defenseStatusEffects.begin() ; it != defenseStatusEffects.end() ; ++it) {
+        // αν τελειώσουν οι γύροι
         if ((*it)->passTurn()) {
-            defense -= (*it)->getEffect();
-            delete *it;
-            it = defenseStatusEffects.erase(it);
+            defense -= (*it)->getEffect();          // αναιρείται  η μεταβολή
+            delete *it;                             // αφαιρείται το
+            it = defenseStatusEffects.erase(it);    // status effect
         }
     }
+
+    // για τα status effects ευκινησίας
     for (std::list<StatusEffect*>::iterator it = agilityStatusEffects.begin() ; it != agilityStatusEffects.end() ; ++it) {
+        // αν τελειώσουν οι γύροι
         if ((*it)->passTurn()) {
-            agility -= (*it)->getEffect();
-            delete *it;
-            it = agilityStatusEffects.erase(it);
+            agility -= (*it)->getEffect();          // αναιρείται  η μεταβολή
+            delete *it;                             // αφαιρείται το
+            it = agilityStatusEffects.erase(it);    // status effect
         }
     }
 }
@@ -488,17 +498,38 @@ Party::~Party() {
 // Ανοίγει μενού όπου ο χρήστης μπορεί να επιλέξει όπλο ή πανοπλία που έχει διαθέσιμη η ομάδα και να το κάνει equip ο hero.
 // Αυτό αφαιρείται από το σύνολο των διαθέσιμων αντικειμένων και προστίθεται σε αυτό ό,τι "πάνω του" πριν ο hero/
 // Αν hero == NULL τότε ο χρήστης διαλέγει έναν ήρωα από την ομάδα.
-// Επιστρέφει true αν έγινε επιτυχώς η αλλαγή, αλλιώς false.
+// Επιστρέφει true αν έγινε επιτυχώς η αλλαγή όπλου/πανοπλίας, αλλιώς false.
 bool Party::equip(Hero* hero) {
+
+    // επιλογή ήρωα
+    if (hero == NULL) {
+        int heroPos = 0;
+        if (heroNum > 1) {
+            do {
+                std::cout << "Which hero should equip? (1-" << heroNum << ")" << std::endl;
+                std::cin.clear();
+                std::cin.ignore(1000, '\n');
+                std::cin >> heroPos;
+                --heroPos;
+            }   while ((heroPos < 0) || (heroPos >= heroNum));
+        }
+        hero = heroes[heroPos];
+    }
+
+    // equip όπλο ή πανοπλία;
     std::cout << "What to equip?" << std::endl;
     while (true) {
         std::string input;
         std::cin >> input;
+
+        // equip όπλο
         if (!input.compare("weapon")) {
             if (ownedWeapons.size() == 0) {
                 std::cout << "No weapons owned" << std::endl;
                 return false;
             }
+
+            // επιλογή όπλου
             std::cout << "Which weapon to equip?" << std::endl;
             int i = 0;
             for (std::vector<Weapon*>::iterator iter = ownedWeapons.begin() ; iter != ownedWeapons.end() ; ++iter, ++i) {
@@ -520,19 +551,8 @@ bool Party::equip(Hero* hero) {
                 }
             }
             Weapon* toEquip = ownedWeapons[weaponPos];
-            if (hero == NULL) {
-                int heroPos = 0;
-                if (heroNum > 1) {
-                    do {
-                        std::cout << "Which hero should equip it? (1-" << heroNum << ")" << std::endl;
-                        std::cin.clear();
-                        std::cin.ignore(1000, '\n');
-                        std::cin >> heroPos;
-                        --heroPos;
-                    }   while ((heroPos < 0) || (heroPos >= heroNum));
-                }
-                hero = heroes[heroPos];
-            }
+
+            // equip
             Weapon* oldWeapon;
             if ((oldWeapon = hero->equip(toEquip)) != toEquip) {
                 ownedWeapons.erase(ownedWeapons.begin() + weaponPos);
@@ -545,11 +565,15 @@ bool Party::equip(Hero* hero) {
                 return false;
             }
         }
+
+        // equip πανοπλία
         else if (!input.compare("armor")) {
             if (ownedArmors.size() == 0) {
                 std::cout << "No armors owned" << std::endl;
                 return false;
             }
+
+            // επιλογή πανοπλίας
             std::cout << "Which armor to equip?" << std::endl;
             int i = 0;
             for (std::vector<Armor*>::iterator iter = ownedArmors.begin() ; iter != ownedArmors.end() ; ++iter, ++i) {
@@ -571,19 +595,8 @@ bool Party::equip(Hero* hero) {
                 }
             }
             Armor* toEquip = ownedArmors[armorPos];
-            if (hero == NULL) {
-                int heroPos = 0;
-                if (heroNum > 1) {
-                    do {
-                        std::cout << "Which hero should equip it? (1-" << heroNum << ")" << std::endl;
-                        std::cin.clear();
-                        std::cin.ignore(1000, '\n');
-                        std::cin >> heroPos;
-                        --heroPos;
-                    }   while ((heroPos < 0) || (heroPos >= heroNum));
-                }
-                hero = heroes[heroPos];
-            }
+
+            // equip
             Armor* oldArmor;
             if ((oldArmor = hero->equip(toEquip)) != toEquip) {
                 ownedArmors.erase(ownedArmors.begin() + armorPos);
@@ -596,9 +609,11 @@ bool Party::equip(Hero* hero) {
                 return false;
             }
         }
+
         else if (!input.compare("back")) {
             return false;
         }
+
         else {
             std::cout << "Invalid input" << std::endl;
         }
@@ -613,6 +628,23 @@ bool Party::use(Hero* hero) {
         std::cout << "No potions owned" << std::endl;
         return false;
     }
+
+    // επιλογή ήρωα
+    if (hero == NULL) {
+        int heroPos = 0;
+        if (heroNum > 1) {
+            do {
+                std::cout << "Which hero should use it? (1-" << heroNum << ")" << std::endl;
+                std::cin.clear();
+                std::cin.ignore(1000, '\n');
+                std::cin >> heroPos;
+                --heroPos;
+            }   while ((heroPos < 0) || (heroPos >= heroNum));
+        }
+        hero = heroes[heroPos];
+    }
+
+    // επιλογή φίλτρου
     std::cout << "Which potion to use?" << std::endl;
     int i = 0;
     for (std::vector<Potion*>::iterator iter = ownedPotions.begin() ; iter != ownedPotions.end() ; ++iter, ++i) {
@@ -635,19 +667,8 @@ bool Party::use(Hero* hero) {
         }
     }
     Potion* toUse = ownedPotions[potionPos];
-    if (hero == NULL) {
-        int heroPos = 0;
-        if (heroNum > 1) {
-            do {
-                std::cout << "Which hero should use it? (1-" << heroNum << ")" << std::endl;
-                std::cin.clear();
-                std::cin.ignore(1000, '\n');
-                std::cin >> heroPos;
-                --heroPos;
-            }   while ((heroPos < 0) || (heroPos >= heroNum));
-        }
-        hero = heroes[heroPos];
-    }
+
+    // χρήση
     if (hero->use(*toUse)) {
         ownedPotions.erase(ownedPotions.begin() + potionPos);
         return true;
@@ -895,12 +916,15 @@ void Party::sell() {
         std::string input;
         std::cout << "What to sell?" << std::endl;
         while (true) {
+            // επιλογή τύπου αντικειμένου
             std::cin >> input;
             if (!input.compare("weapon")) {
                 if (ownedWeapons.size() == 0) {
                     std::cout << "No weapons owned" << std::endl;
                     return;
                 }
+
+                // επιλογή όπλου
                 std::cout << "Which weapon to sell?" << std::endl;
                 int i = 0;
                 for (std::vector<Weapon*>::iterator iter = ownedWeapons.begin() ; iter != ownedWeapons.end() ; ++iter, ++i) {
@@ -921,6 +945,8 @@ void Party::sell() {
                         std::cout << "Invalid input" << std::endl;
                     }
                 }
+
+                // πώληση
                 heroes[0]->spendMoney(-1*(ownedWeapons[weaponPos]->getPrice()/2));
                 ownedWeapons.erase(ownedWeapons.begin() + weaponPos);
                 break;
@@ -930,6 +956,8 @@ void Party::sell() {
                     std::cout << "No armors owned" << std::endl;
                     return;
                 }
+
+                // επιλογή πανοπλίας
                 std::cout << "Which armor to sell?" << std::endl;
                 int i = 0;
                 for (std::vector<Armor*>::iterator iter = ownedArmors.begin() ; iter != ownedArmors.end() ; ++iter, ++i) {
@@ -950,6 +978,8 @@ void Party::sell() {
                         std::cout << "Invalid input" << std::endl;
                     }
                 }
+
+                // πώληση
                 heroes[0]->spendMoney(-1*(ownedArmors[armorPos]->getPrice()/2));
                 ownedArmors.erase(ownedArmors.begin() + armorPos);
                 break;
@@ -959,6 +989,8 @@ void Party::sell() {
                     std::cout << "No potions owned" << std::endl;
                     return;
                 }
+
+                // επιλογή φίλτρου
                 std::cout << "Which potion to sell?" << std::endl;
                 int i = 0;
                 for (std::vector<Potion*>::iterator iter = ownedPotions.begin() ; iter != ownedPotions.end() ; ++iter, ++i) {
@@ -979,6 +1011,8 @@ void Party::sell() {
                         std::cout << "Invalid input" << std::endl;
                     }
                 }
+
+                // πώληση
                 heroes[0]->spendMoney(-1*(ownedPotions[potionPos]->getPrice()/2));
                 ownedPotions.erase(ownedPotions.begin() + potionPos);
                 break;
@@ -988,6 +1022,8 @@ void Party::sell() {
                     std::cout << "No spells owned" << std::endl;
                     return;
                 }
+
+                // επιλογή ξορκιού
                 std::cout << "Which spell to sell?" << std::endl;
                 int i = 0;
                 for (std::vector<Spell*>::iterator iter = ownedSpells.begin() ; iter != ownedSpells.end() ; ++iter, ++i) {
@@ -1008,6 +1044,8 @@ void Party::sell() {
                         std::cout << "Invalid input" << std::endl;
                     }
                 }
+
+                // πώληση
                 heroes[0]->spendMoney(-1*(ownedSpells[spellPos]->getPrice()/2));
                 ownedSpells.erase(ownedSpells.begin() + spellPos);
                 break;
@@ -1016,6 +1054,8 @@ void Party::sell() {
                 std::cout << "Invalid input" << std::endl;
             }
         }
+
+        // επιλογή συνέχειας ή εξόδου
         bool done;
         std::cout << "Sell more? (y/n)" << std::endl;
         while (true) {
@@ -1072,23 +1112,24 @@ void Party::displayHeroStats() const {
 // Τα φίλτρα χωρίζονται δια τρία σε δύναμης, επιδεξιότητας και ετκινησίας, και τα ξόρκια σε πάγου, φωτιάς και ηλεκτρισμού.
 Market::Market(int weaponNumInit, int armorNumInit, int potionNumInit, int spellNumInit)
 :   weaponAmount(weaponNumInit), armorAmount(armorNumInit), potionAmount(potionNumInit), spellAmount(spellNumInit) {
-    int potionOffset = weaponAmount + armorAmount;
+    int armorOffset = weaponAmount;
+    int potionOffset = armorOffset + armorAmount;
     int spellOffset = potionOffset + potionAmount;
     int itemAmount = spellOffset + spellAmount;
     stock = new Item*[itemAmount];
     for (int i = 0 ; i < weaponAmount ; ++i) {
         stock[i] = new Weapon(weaponNames[i], i + 1, i/(2*weaponAmount/3));
     }
-    for (int i = weaponAmount ; i < potionOffset ; ++i) {
+    for (int i = armorOffset ; i < armorOffset + armorAmount ; ++i) {
         stock[i] = new Armor(armorNames[i - weaponAmount], i - weaponAmount + 1);
-    }
+    } 
     for (int i = potionOffset ; i < potionOffset + potionAmount/3 ; ++i) {
         stock[i] = new StrengthPotion(potionNames[i - potionOffset], i - potionOffset + 1);
     }
     for (int i = potionOffset + potionAmount/3 ; i < potionOffset + (2*potionAmount)/3 ; ++i) {
         stock[i] = new DexterityPotion(potionNames[i - potionOffset], i - (potionOffset + potionAmount/3) + 1);
     }
-    for (int i = potionOffset + (2*potionNumInit)/3 ; i < spellOffset ; ++i) {
+    for (int i = potionOffset + (2*potionNumInit)/3 ; i < potionOffset + potionAmount ; ++i) {
         stock[i] = new AgilityPotion(potionNames[i - potionOffset], i - (potionOffset + (2*potionNumInit)/3) + 1);
     }
     for (int i = spellOffset ; i < spellOffset + spellAmount/3 ; ++i) {
@@ -1122,6 +1163,8 @@ void Market::buy(Party& party) {
         std::string input;
         int offset, amount;
         int type;
+
+        // επιλογή τύπου αντικειμένου
         std::cout << "What to buy?" << std::endl;
         while (true) {
             std::cin >> input;
@@ -1153,6 +1196,8 @@ void Market::buy(Party& party) {
                 std::cout << "Invalid input" << std::endl;
             }
         }
+
+        // επιλογή αντικειμένου
         std::cout << "Choose one:" << std::endl;
         for (int i = 0 ; i < amount ; ++i) {
             std::cout << "\n(" << i + 1 << ")" << std::endl;
@@ -1165,15 +1210,19 @@ void Market::buy(Party& party) {
             }
             else if ((atoi(input.c_str()) > 0) && (atoi(input.c_str()) <= amount)) {
                 if (type == 0) {
+                    // αγορά όπλου
                     party.buy((Weapon*) stock[atoi(input.c_str()) - 1 + offset]);
                 }
                 else if (type == 1) {
+                    // αγορά πανοπλίας
                     party.buy((Armor*) stock[atoi(input.c_str()) - 1 + offset]);
                 }
                 else if (type == 2) {
+                    // αγορά φίλτρου
                     party.buy((Potion*) stock[atoi(input.c_str()) - 1 + offset]);
                 }
                 else if (type == 3) {
+                    // αγορά ξορκιού
                     party.buy((Spell*) stock[atoi(input.c_str()) - 1 + offset]);
                 }
                 break;
@@ -1182,6 +1231,8 @@ void Market::buy(Party& party) {
                 std::cout << "Invalid input" << std::endl;
             }
         }
+
+        // επιλογή συνέχειας ή εξόδου
         bool done;
         std::cout << "Buy more? (y/n)" << std::endl;
         while (true) {
@@ -1210,10 +1261,13 @@ void Market::buy(Party& party) {
 // Φτιάχνει μια ομάδα όπως ορίζουν τα ορίσματα και μια αγορά με 15 αντικείμενα κάθε είδους,
 Grid::Grid(int initWidth, int initHeight, HeroType* heroTypes, int heroNumInit)
 :   width(initWidth), height(initHeight), party(heroTypes, heroNumInit), position{0,0}, gameMarket(15, 15, 15, 15) {
+    // δημιουργία πλέγματος
     grid = new Square*[width];
     for (int i = 0 ; i < width ; ++i) {
         grid[i] = new Square[height];
     }
+
+    // τυχαία αρχικοποίηση πλέγματος
     srand(time(NULL));
     for (int i = 0 ; i < width ; ++i) {
         for (int j = 0 ; j < height ; ++j) {
@@ -1228,6 +1282,7 @@ Grid::Grid(int initWidth, int initHeight, HeroType* heroTypes, int heroNumInit)
             }
         }
     }
+    // με το αρχικό τετράγωνο να είναι common
     grid[0][0] = common;
 }
 
@@ -1245,12 +1300,17 @@ Grid::~Grid() {
 // Οταν βρίσκεται σε τετράγωνο αγοράς, μπορεί και να αγοράσει (buy) και να πουλήσει (sell) αντικείμενα και ξόρκια.
 // Μπορεί επίσης να σταματήσει το παιχνίδι (quitGame).
 void Grid::playGame() {
+    // επιλογή εντολής
     while (true) {
         std::string input;
         std::cin >> input;
+
+        // έξοδος από το παιχνίδι
         if (!input.compare("quitGame")) {
             break;
         }
+
+        // κίνηση προς μια κατεύθυνση
         else if (!input.compare("move")) {
             while (true) {
                 std::cin >> input;
@@ -1275,21 +1335,33 @@ void Grid::playGame() {
                 }
             }
         }
+
+        // εκτύπωση των στοιχείων των ηρώων της ομάδας
         else if (!input.compare("displayHeroStats")) {
             party.displayHeroStats();
         }
+
+        // εκτύπωση των αντικειμένων (συμπεριλαμβανομένων των ξορκιών) της ομάδας
         else if (!input.compare("checkInventory")) {
             party.checkInventory();
         }
+
+        // equip διαθέσιμου όπλου ή πανοπλίας από ήρωα της ομάδας
         else if (!input.compare("equip")) {
             party.equip();
         }
+
+        // χρήση διαθέσιμου φίλτρου από ήρωα της ομάδας
         else if (!input.compare("use")) {
             party.use();
         }
+
+        // εκτύπωση πλέγματος
         else if (!input.compare("displayMap")) {
             displayMap();
         }
+
+        // αγορά αντικειμένων, μόνο όταν βρίσκεται η ομάδα σε τετράωνο αγοράς
         else if (!input.compare("buy")) {
             if (grid[position[0]][position[1]] != market) {
                 std::cout << "Can't buy outiside of the market" << std::endl;
@@ -1297,6 +1369,8 @@ void Grid::playGame() {
             }
             gameMarket.buy(party);
         }
+
+        // πώληση αντικειμένων, μόνο όταν βρίσκεται η ομάδα σε τετράωνο αγοράς
         else if (!input.compare("sell")) {
             if (grid[position[0]][position[1]] != market) {
                 std::cout << "Can't sell outiside of the market" << std::endl;
@@ -1304,6 +1378,7 @@ void Grid::playGame() {
             }
             gameMarket.sell(party);
         }
+
         /*
         else if (!input.compare("up")) {
             for (int i = 0 ; i < heroNum ; ++i) {
@@ -1316,6 +1391,7 @@ void Grid::playGame() {
             battle();
         }
         */
+
         else {
             std::cout << "Unknown command" << std::endl;
         }
@@ -1325,6 +1401,7 @@ void Grid::playGame() {
 // Κινεί την ομάδα προς την κατεύθυνση direction.
 // Αν πάει σε common τετράγωνο υπάρχει μια πιθανότητα να ξεκινήσει μάχη της ομάδας (battle) με τέρατα.
 void Grid::move(Direction direction) {
+    // κίνηση, αν είναι δυνατή
     if (direction == upDir) {
         if (position[1] + 1 >= height) {
             std::cout << "Can't move out of bounds" << std::endl;
@@ -1369,6 +1446,8 @@ void Grid::move(Direction direction) {
         }
         ++position[0];
     }
+
+    // αν το καινούργιο τετράγωνο είναι common υπάρχει μια πιθανότητα έναρξης μάχης
     if ((grid[position[0]][position[1]] == common) && !(rand() % 4)) {
         party.battle();
     }
