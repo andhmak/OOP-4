@@ -481,7 +481,7 @@ enum Direction { upDir, downDir, leftDir, rightDir };
 class Grid {
     Square** grid;      // το πλέγμα των τετραγώνων
     int width;          // το πλάτος του πλέγματος
-    int height;         // το ύωος του πλέγματος
+    int height;         // το ύψος του πλέγματος
     Party party;        // η ομάδα των ηρώων που κινείται στο πλέγμα
     int position[2];    // η θέση της ομάδας στο πλέγμα
     Market gameMarket;  // η αγορά του πλέγματος/παιχνιδιού
