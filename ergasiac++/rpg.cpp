@@ -210,6 +210,9 @@ void Hero::gainDamage(int damage) {
     if ((rand() % (50 + agility)) < 50) {
         Living::gainDamage(damage - (armor == NULL ? 0 : armor->getDefense()));
     }
+    else {
+        std::cout << "Attack evaded!" << std::endl;
+    }
 }
 
 // Αν money >= amount, αφαιρείται το amount, και επιστρέφεται true. Αλλιώς false.
@@ -476,13 +479,13 @@ void Spirit::print() const {
 Party::Party(HeroType* heroTypes, int heroNumInit) : heroNum(heroNumInit), heroes(new Hero*[heroNumInit]) {
     for (int i = 0 ; i < heroNum ; ++i) {
         if (heroTypes[i] == warrior) {
-            heroes[i] = new Warrior(names[rand() % 98]);
+            heroes[i] = new Warrior(livingNames[rand() % 98]);
         }
         else if (heroTypes[i] == sorcerer) {
-            heroes[i] = new Sorcerer(names[rand() % 98]);
+            heroes[i] = new Sorcerer(livingNames[rand() % 98]);
         }
         else {
-            heroes[i] = new Paladin(names[rand() % 98]);
+            heroes[i] = new Paladin(livingNames[rand() % 98]);
         }
     }
 }
@@ -696,13 +699,13 @@ void Party::battle() {
     Monster** monsters = new Monster*[monsterNum];
     for (int i = 0 ; i < monsterNum ; ++i) {
         if (!(rand() % 3)) {
-            monsters[i] = new Dragon(names[rand() % 98], averageHeroLevel);
+            monsters[i] = new Dragon(livingNames[rand() % 98], averageHeroLevel);
         }
         else if (!(rand() % 2)) {
-            monsters[i] = new Exoskeleton(names[rand() % 98], averageHeroLevel);
+            monsters[i] = new Exoskeleton(livingNames[rand() % 98], averageHeroLevel);
         }
         else {
-            monsters[i] = new Spirit(names[rand() % 98], averageHeroLevel);
+            monsters[i] = new Spirit(livingNames[rand() % 98], averageHeroLevel);
         }
     }
     bool won, lost;
@@ -1118,31 +1121,31 @@ Market::Market(int weaponNumInit, int armorNumInit, int potionNumInit, int spell
     int itemAmount = spellOffset + spellAmount;
     stock = new Item*[itemAmount];
     for (int i = 0 ; i < weaponAmount ; ++i) {
-        stock[i] = new Weapon(weaponNames[i], i + 1, i/(2*weaponAmount/3));
+        stock[i] = new Weapon(weaponNames[i % 119], i + 1, i/(2*weaponAmount/3));
     }
     for (int i = armorOffset ; i < armorOffset + armorAmount ; ++i) {
-        stock[i] = new Armor(armorNames[i - weaponAmount], i - weaponAmount + 1);
+        stock[i] = new Armor(armorNames[(i - armorOffset) % 80], i - armorOffset + 1);
     } 
     for (int i = potionOffset ; i < potionOffset + potionAmount/3 ; ++i) {
-        stock[i] = new StrengthPotion(potionNames[i - potionOffset], i - potionOffset + 1);
+        stock[i] = new StrengthPotion(potionNames[(i - potionOffset) % 66], i - potionOffset + 1);
     }
     for (int i = potionOffset + potionAmount/3 ; i < potionOffset + (2*potionAmount)/3 ; ++i) {
-        stock[i] = new DexterityPotion(potionNames[i - potionOffset], i - (potionOffset + potionAmount/3) + 1);
+        stock[i] = new DexterityPotion(potionNames[(i - potionOffset) % 66], i - (potionOffset + potionAmount/3) + 1);
     }
     for (int i = potionOffset + (2*potionNumInit)/3 ; i < potionOffset + potionAmount ; ++i) {
-        stock[i] = new AgilityPotion(potionNames[i - potionOffset], i - (potionOffset + (2*potionNumInit)/3) + 1);
+        stock[i] = new AgilityPotion(potionNames[(i - potionOffset) % 66], i - (potionOffset + (2*potionNumInit)/3) + 1);
     }
     for (int i = spellOffset ; i < spellOffset + spellAmount/3 ; ++i) {
-        stock[i] = new IceSpell(spellNames[i - spellOffset], i - spellOffset + 1, 2*(i - spellOffset + 1), (i - spellOffset + 2)*5);
+        stock[i] = new IceSpell(spellNames[(i - spellOffset) % 91], i - spellOffset + 1, 2*(i - spellOffset + 1), (i - spellOffset + 2)*5);
     }
     for (int i = spellOffset + spellAmount/3 ; i < spellOffset + (2*spellAmount)/3 ; ++i) {
-        stock[i] = new FireSpell(spellNames[i - spellOffset],
+        stock[i] = new FireSpell(spellNames[(i - spellOffset) % 91],
                                 i - (spellOffset + spellAmount/3) + 1,
                                 2*(i - (spellOffset + spellAmount/3) + 1),
                                 (i - (spellOffset + spellAmount/3) + 2)*5);
     }
     for (int i = spellOffset + (2*spellAmount)/3 ; i < spellOffset + spellAmount ; ++i) {
-        stock[i] = new LightingSpell(spellNames[i - spellOffset],
+        stock[i] = new LightingSpell(spellNames[(i - spellOffset) % 91],
                                     i - (spellOffset + (2*spellAmount)/3) + 1,
                                     2*(i - (spellOffset + (2*spellAmount)/3) + 1),
                                     (i - (spellOffset + (2*spellAmount)/3) + 2)*5);
