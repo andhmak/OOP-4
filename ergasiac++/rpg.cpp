@@ -695,7 +695,7 @@ bool Party::use(Hero* hero) {
 void Party::battle() {
     std::cout << "Battle!" << std::endl;
 
-    // Δημιουργία τεράτων επιπέδου όσο του μέσου όρου των ηρώων
+    // δημιουργία τεράτων επιπέδου όσο του μέσου όρου των ηρώων
     int averageHeroLevel = 0;
     for (int i = 0 ; i < heroNum ; ++i) {
         averageHeroLevel += heroes[i]->getLevel();
@@ -715,12 +715,12 @@ void Party::battle() {
         }
     }
 
-    // Διαδικασία μάχης
+    // διαδικασία μάχης
     bool won, lost;
     while (true) {  // κάθε επανάληψη είανι ένας γύρος
         std::string input;
 
-        // Εκτύπωση στατιστικών
+        // εκτύπωση στατιστικών
         std::cout << "Display stats? (y/n)" << std::endl;
         while (true) {
             std::cin >> input;
@@ -742,21 +742,21 @@ void Party::battle() {
 
         won = true, lost = true;
 
-        // Σειρά των ηρώων
+        // σειρά των ηρώων
         for (int i = 0 ; i < heroNum ; ++i) {
 
-            // Επιλογή πράξης αν ο ήρωας δεν έχει λιποθυμήσει
+            // επιλογή πράξης αν ο ήρωας δεν έχει λιποθυμήσει
             if (heroes[i]->getHealthPower() != 0) {
                 lost = false;
                 while (true) {
                     std::cout << "What should " << heroes[i]->getName() << " do?" << std::endl;
                     std::cin >> input;
 
-                    // Κανονική επίθεση
+                    // κανονική επίθεση
                     if (!input.compare("attack")) {
                         int numInput;
 
-                        // Επιλογή τέρατος στο οποίο θα επιτεθεί
+                        // επιλογή τέρατος στο οποίο θα επιτεθεί
                         std::cout << "Which monster to attack?" << std::endl;
                         for (int j = 0 ; j < monsterNum ; ++j) {
                             std::cout << "(" << j + 1 << ") " << monsters[j]->getName() << ", HP: " << monsters[j]->getHealthPower() <<  std::endl;
@@ -773,19 +773,19 @@ void Party::battle() {
                             }
                         }
 
-                        // Επίθεση
+                        // επίθεση
                         heroes[i]->attack(*monsters[numInput - 1]);
                         break;
                     }
 
-                    // Επίθεση με ξόρκι
+                    // επίθεση με ξόρκι
                     else if (!input.compare("castSpell")) {
                         if (ownedSpells.size() == 0) {
                             std::cout << "No spells owned" << std::endl;
                             continue;
                         }
 
-                        // Επιλογή ξορκιού
+                        // επιλογή ξορκιού
                         std::cout << "Which spell to cast?" << std::endl;
                         int j = 0;
                         for (std::vector<Spell*>::iterator iter = ownedSpells.begin() ; iter != ownedSpells.end() ; ++iter, ++j) {
@@ -806,7 +806,7 @@ void Party::battle() {
                         }
                         Spell* toCast = ownedSpells[spellPos];
 
-                        // Επιλογή τέρατος στο οποίο θα επιτεθεί
+                        // επιλογή τέρατος στο οποίο θα επιτεθεί
                         int numInput;
                         std::cout << "Which monster to cast the spell on?" << std::endl;
                         for (int j = 0 ; j < monsterNum ; ++j) {
@@ -824,26 +824,26 @@ void Party::battle() {
                             }
                         }
 
-                        // Επίθεση
+                        // επίθεση
                         if (heroes[i]->castSpell(*toCast, *monsters[numInput - 1])) {
                             break;
                         }
                     }
 
-                    // Χρήση φίλτρου
+                    // χρήση φίλτρου
                     else if (!input.compare("use")) {
                         if (use(heroes[i])) {
                             break;
                         }
                     }
 
-                    // ΑΛλαγή όπλου ή πανοπλίας
+                    // αλλαγή όπλου ή πανοπλίας
                     else if (!input.compare("equip")) {
                         if (equip(heroes[i])) {
                             break;
                         }
                     }
-                    
+
                     else {
                         std::cout << "Unknown command" << std::endl;
                     }
@@ -851,7 +851,7 @@ void Party::battle() {
             }
         }
 
-        // Σειρά των τεράτων
+        // σειρά των τεράτων
         for (int i = 0 ; i < monsterNum ; ++i) {
             if (monsters[i]->getHealthPower() != 0) {
                 won = false;
@@ -865,23 +865,23 @@ void Party::battle() {
             }
         }
 
-        // Αν οι ήρωες νίκησαν ή έχασαν, τελειώνει η μάχη
+        // αν οι ήρωες νίκησαν ή έχασαν, τελειώνει η μάχη
         if (won || lost) {
             break;
         }
 
-        // Πέρασμα γύρου για τους ήρωες
+        // πέρασμα γύρου για τους ήρωες
         for (int i = 0 ; i < heroNum ; ++i) {
             heroes[i]->endTurn();
         }
 
-        // Πέρασμα γύρου για τα τέρατα
+        // πέρασμα γύρου για τα τέρατα
         for (int i = 0 ; i < monsterNum ; ++i) {
             monsters[i]->endTurn();
         }
     }
 
-    // Κέρδος χρημάτων και εμπειρίας από τους ήρωες σε περίπτωση νίκης
+    // κέρδος χρημάτων και εμπειρίας από τους ήρωες σε περίπτωση νίκης
     if (won) {
         std::cout << "The party has won!" << std::endl;
         for (int i = 0 ; i < heroNum ; ++i) {
@@ -890,7 +890,7 @@ void Party::battle() {
         }
     }
 
-    // Χάσιμο των μισών χρημάρων των ηρώων σε περίπτωση ήττας
+    // χάσιμο των μισών χρημάρων των ηρώων σε περίπτωση ήττας
     else {
         std::cout << "The party has lost!" << std::endl;
         for (int i = 0 ; i < heroNum ; ++i) {
@@ -898,14 +898,14 @@ void Party::battle() {
         }
     }
 
-    // Επαναφορά μισής ζωτικής ενέργειας των ηρώων που είχαν μείνει με 0
+    // επαναφορά μισής ζωτικής ενέργειας των ηρώων που είχαν μείνει με 0
     for (int i = 0 ; i < heroNum ; ++i) {
         if (heroes[i]->getHealthPower() == 0) {
             heroes[i]->recoverHealthPower(heroes[i]->getMaxHealthPower() / 2);
         }
     }
 
-    // Διαγραφή τεράτων
+    // διαγραφή τεράτων
     for (int i = 0 ; i < monsterNum ; ++i) {
         delete monsters[i];
     }
@@ -1431,19 +1431,6 @@ void Grid::playGame() {
             }
             gameMarket.sell(party);
         }
-
-        /*
-        else if (!input.compare("up")) {
-            for (int i = 0 ; i < heroNum ; ++i) {
-                heroes[i]->gainExperience(210);
-            }
-        }
-        */
-        /*
-        else if (!input.compare("battle")) {
-            battle();
-        }
-        */
 
         else {
             std::cout << "Unknown command" << std::endl;
