@@ -1,3 +1,5 @@
+/* File: rpg.cpp */
+
 #include <iostream>
 #include <string>
 #include <cstdlib>

@@ -1,3 +1,5 @@
+/* File: rpg.h */
+
 #include <iostream>
 #include <string>
 #include <vector>
