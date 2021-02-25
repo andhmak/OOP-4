@@ -333,7 +333,7 @@ class Monster : public Living {
         ~Monster();
 
         // Προκαλεί στο creature ζημία τυχαία εντός του εύρους ζημιάς του τέρατος
-        void attack(Living& creature) const { creature.gainDamage(minDamage + (rand() % (maxDamage - minDamage + 1))); }
+        void attack(Living& creature) const;
 
         // Λαμβάνει υπόψιν την άμυνα και την ευκινησία, και καλεί την gainDamage της υπερκλάσης Living περνόντας την τροποποιημένη damage
         void gainDamage(int damage);

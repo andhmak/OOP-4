@@ -374,6 +374,11 @@ Monster::~Monster() {
     }
 }
 
+// Προκαλεί στο creature ζημία τυχαία εντός του εύρους ζημιάς του τέρατος
+void Monster::attack(Living& creature) const {
+    creature.gainDamage(minDamage + (rand() % (maxDamage - minDamage + 1)));
+}
+
 // Λαμβάνει υπόψιν την άμυνα και την ευκινησία, και καλεί την gainDamage της Living περνόντας την τροποποιημένη damage
 void Monster::gainDamage(int damage) {
     if ((rand() % (50 + agility)) < 50) {
