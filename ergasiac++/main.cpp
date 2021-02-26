@@ -2,7 +2,7 @@
 
 #include <iostream>
 #include <string>
-#include "rpg.h"
+#include "rpggame.h"
 
 using namespace std;
 
